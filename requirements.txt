@@ -7,3 +7,4 @@ cryptography
 requests
 loguru
 lxml
+BloodSpiderModel
