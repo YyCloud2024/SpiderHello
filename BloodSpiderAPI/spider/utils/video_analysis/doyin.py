@@ -13,8 +13,31 @@ class DouyinVideoParse:
         self.common_utils = GeneralToolkit()
         self.blood_spider_print_logger = BloodSpiderPrintLogger()
 
+    def extract_first_link(self, text):
+        """
+        从文本中提取第一个出现的链接，支持各种常见链接格式
+
+        参数:
+            text: 可能包含链接的文本字符串
+
+        返回:
+            str: 提取到的第一个链接，如果没有找到则返回空字符串
+        """
+        # 通用链接正则表达式模式，支持http/https开头的链接
+        # 匹配各种常见的链接字符，包括字母、数字、符号等
+        pattern = r'https?://[^\s"\'<]+'
+
+        # 查找第一个匹配的链接
+        match = re.search(pattern, text)
+
+        if match:
+            return match.group()
+        else:
+            return ""
+
     # 解析函数
     def analysis(self, shared_link: str):
+        shared_link = self.extract_first_link(shared_link)
         self.blood_spider_print_logger.blood_spider_print_debug("解析抖音视频开始")
 
         # 第一次请求,后服务器引导跳到得到视频页链接
@@ -44,4 +67,4 @@ class DouyinVideoParse:
 
 if __name__ == '__main__':
     douyin_video_parse = DouyinVideoParse()
-    print(douyin_video_parse.analysis("https://v.douyin.com/rNAeh0Ol_AE/"))
+    print(douyin_video_parse.analysis("9.71 03/11 h@o.da ZmQ:/ 今日无事，勾栏听曲！# 赵都礼宴 # 勾栏听曲  https://v.douyin.com/F9X_7G4Rk4U/ 复制此链接，打开Dou音搜索，直接观看视频！"))
