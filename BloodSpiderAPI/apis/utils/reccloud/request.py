@@ -1,4 +1,3 @@
-from BloodSpiderModel.DjangoResponseTool.response_dict import response_dict
 from BloodSpiderAPI.spider.utils.reccloud_cn.main import ReccloudMain
 import json
 import os

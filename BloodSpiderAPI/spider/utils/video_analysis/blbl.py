@@ -6,6 +6,7 @@ import urllib.parse
 from typing import Optional, Dict, Any
 from BloodSpiderModel.spider_tools.common_utils import GeneralToolkit
 from BloodSpiderModel.BloodSpiderPrint.blood_spider_print_logger import BloodSpiderPrintLogger
+from BloodSpiderModel.CommonFormat.video_analysis import VideoAnalysis as video_analysis_class
 # 哔哩哔哩视频解析
 
 
@@ -14,6 +15,7 @@ class BilibiliVideoClient:
     """Bilibili 视频相关 API 客户端"""
 
     def __init__(self):
+        self.common_format_video_analysis = video_analysis_class()
         self.wbi_keys = {}
         self.headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
@@ -176,8 +178,9 @@ class BLBLVideoParse:
             raise Exception(f"获取视频流地址失败,请您联系微信: {BloodSpiderModel.contact_method['wexin']} 需求帮助({BloodSpiderModel.athor}免费提供支持)")
         elif len(stream_url['data']['durl']) < 0:
             raise Exception(f"没有找到视频链接,请您联系微信: {BloodSpiderModel.contact_method['wexin']} 需求帮助({BloodSpiderModel.athor}免费提供支持)")
-
-        return stream_url['data']['durl'][0]['url']
+        create_video_analysis = self.blbl_helper.common_format_video_analysis.video_analysis()
+        create_video_analysis["video_play_url"] = stream_url['data']['durl'][0]['url']
+        return create_video_analysis
 
 
 
