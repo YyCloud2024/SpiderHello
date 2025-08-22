@@ -48,6 +48,16 @@ def get_music_data(request):
     # 执行获取操作
     try:
         index_data = music_data.get_music_data(music_id)
+        # index_data = {
+        #     "name": "陈奕迅《十面埋伏》[Mp3_Lrc]",
+        #     "music_url": "https://er-sycdn.kuwo.cn/147697ea3d5b85e9cd71d5b1ad7d50f1/68969def/resource/30106/trackmedia/C200000lVKbP3bCwxu.m4a?from=vip",
+        #     "music_cover": "https://img1.kuwo.cn/star/albumcover/300/s4s15/9/1486376130.jpg",
+        #     "artistName": "陈奕迅",
+        #     "artistId": "eG4",
+        #     "artist_music_count": "2772",
+        #     "albumName": "Live For Today",
+        #     "albumId": "bWg"
+        # }
     except Exception as e:
         return response_dict(code=500, message=f"获取音乐数据出错：{str(e)}")
 

@@ -250,13 +250,9 @@ class BloodSpiderMusic2T58:
         search_url = self.base_url + f"/so/{music_name}/1.html"
         self.blood_spider_print_logger.blood_spider_print_debug(f"构建搜索 URL: {search_url}")
         
-        response = requests.get(search_url).text
-        self.blood_spider_print_logger.blood_spider_print_info(f"搜索请求成功，开始解析结果")
-        
-        tree = etree.HTML(response)
-        
+        response = self._get_html_tree(search_url, is_tree= True)
         self.blood_spider_print_logger.blood_spider_print_debug("查找歌曲列表元素")
-        song_list_element = tree.xpath('//div[@class="play_list"]/ul')
+        song_list_element = response.xpath('//div[@class="play_list"]/ul')
         
         if not song_list_element:
             self.blood_spider_print_logger.blood_spider_print_warning(f"未找到歌曲列表元素，可能没有搜索结果")
@@ -368,7 +364,6 @@ class BloodSpiderMusic2T58:
 if __name__ == '__main__':
     blood_spider_2t58 = BloodSpiderMusic2T58()
     
-    index_data = blood_spider_2t58.get_singer_album("eHh3Y2Nz")
+    index_data = blood_spider_2t58.search_music("孙燕姿")
     
-    print(f"获取完成，共获取 {len(index_data.get('singer_music_list', []))} 首歌曲 {index_data}")
-    # print(index_data)  # 注释掉原始打印，避免输出大量数据
+    print(index_data)  # 注释掉原始打印，避免输出大量数据

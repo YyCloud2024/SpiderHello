@@ -30,8 +30,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'BloodSpiderAPI.apps.BloodSpiderAPIConfig',
     'corsheaders',
+    'BloodSpiderAPI.apps.BloodSpiderAPIConfig',
 ]
 
 MIDDLEWARE = [
