@@ -1,0 +1,1078 @@
+{% extends "pc/template.html" %}
+
+{% block title %}
+视频解析 - BloodSpider爬虫工具
+{% endblock %}
+
+{% block css %}
+<style>
+:root {
+  /* 紫色神秘质感系列 */
+  --primary-purple: #6366f1;
+  --secondary-purple: #8b5cf6;
+  --light-purple: #c4b5fd;
+  --dark-bg: #1e1b4b;
+  
+  /* 天蓝色清透感系列 */
+  --sky-blue: #0ea5e9;
+  --light-blue: #7dd3fc;
+  
+  /* 抹茶绿自然调系列 */
+  --matcha-green: #10b981;
+  --light-green: #6ee7b7;
+  
+  /* 功能性颜色 */
+  --text-primary: #1f2937;
+  --text-secondary: #6b7280;
+  --card-bg: rgba(99, 102, 241, 0.1);
+  --glass-bg: rgba(255, 255, 255, 0.1);
+  
+  /* 渐变色方案 */
+  --gradient-primary: linear-gradient(135deg, var(--primary-purple), var(--sky-blue));
+  --gradient-secondary: linear-gradient(135deg, var(--matcha-green), var(--light-blue));
+  
+  /* 阴影系统 */
+  --shadow-purple: 0 10px 25px rgba(99, 102, 241, 0.3);
+  --shadow-blue: 0 8px 20px rgba(14, 165, 233, 0.2);
+}
+
+/* 仅对#BloodSpiderBody下的所有元素及伪元素应用box-sizing重置 */
+#BloodSpiderBody *, 
+#BloodSpiderBody *::before, 
+#BloodSpiderBody *::after {
+  box-sizing: border-box;
+}
+
+#BloodSpiderBody {
+  background: linear-gradient(135deg, #f0f9ff 0%, #ede9fe 50%, #ecfdf5 100%);
+  min-height: 100vh;
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  line-height: 1.6;
+}
+
+#BloodSpiderBody .video-analysis-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  width: 100%;
+}
+
+#BloodSpiderBody .header-banner {
+  background: var(--gradient-primary);
+  border-radius: 16px;
+  padding: 32px;
+  color: white;
+  box-shadow: var(--shadow-purple);
+  text-align: center;
+  margin-bottom: 30px;
+  position: relative;
+  overflow: hidden;
+}
+
+#BloodSpiderBody .header-banner::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="spider" patternUnits="userSpaceOnUse" width="20" height="20"><path d="M10,2 L18,10 L10,18 L2,10 Z" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23spider)"/></svg>') repeat;
+  opacity: 0.3;
+}
+
+#BloodSpiderBody .header-banner h1 {
+  font-size: 32px;
+  margin: 0 0 10px 0;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+  position: relative;
+  z-index: 1;
+}
+
+#BloodSpiderBody .header-banner p {
+  font-size: 16px;
+  opacity: 0.9;
+  margin: 0;
+  position: relative;
+  z-index: 1;
+}
+
+#BloodSpiderBody .main-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+  margin-bottom: 30px;
+  align-items: start;
+  width: 100%;
+}
+
+#BloodSpiderBody .analysis-card, #BloodSpiderBody .preview-card {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  border: 1px solid var(--light-purple);
+  transition: all 0.3s ease;
+  width: 100%;
+  min-height: 400px;
+  display: flex;
+  flex-direction: column;
+}
+
+#BloodSpiderBody .analysis-card:hover, #BloodSpiderBody .preview-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-purple);
+}
+
+#BloodSpiderBody .card-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 20px 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+#BloodSpiderBody .card-title i {
+  color: var(--primary-purple);
+}
+
+#BloodSpiderBody .platform-selector {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+  width: 100%;
+}
+
+#BloodSpiderBody .platform-btn {
+  padding: 12px 8px;
+  border: 2px solid var(--light-purple);
+  background: white;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+  font-weight: 500;
+  color: var(--text-primary);
+  position: relative;
+  overflow: hidden;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  font-size: 14px;
+}
+
+#BloodSpiderBody .platform-btn:hover {
+  border-color: var(--primary-purple);
+  transform: translateY(-1px);
+}
+
+#BloodSpiderBody .platform-btn.active {
+  background: var(--gradient-primary);
+  color: white;
+  border-color: var(--primary-purple);
+  box-shadow: var(--shadow-purple);
+}
+
+#BloodSpiderBody .platform-btn i {
+  margin-right: 8px;
+  font-size: 16px;
+}
+
+#BloodSpiderBody .input-group {
+  margin-bottom: 20px;
+}
+
+#BloodSpiderBody .input-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+#BloodSpiderBody .url-input {
+  width: 100%;
+  max-width: 100%;
+  padding: 14px 16px;
+  border: 2px solid var(--light-purple);
+  border-radius: 8px;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  background: white;
+  resize: none;
+  overflow: hidden;
+  word-wrap: break-word;
+  line-height: 1.4;
+}
+
+#BloodSpiderBody .url-input:focus {
+  outline: none;
+  border-color: var(--primary-purple);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+#BloodSpiderBody .url-input::placeholder {
+  color: var(--text-secondary);
+}
+
+#BloodSpiderBody .action-buttons {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+  margin-top: auto;
+}
+
+#BloodSpiderBody .primary-btn, #BloodSpiderBody .secondary-btn {
+  flex: 1;
+  padding: 14px 16px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+}
+
+#BloodSpiderBody .primary-btn {
+  background: var(--gradient-primary);
+  color: white;
+}
+
+#BloodSpiderBody .primary-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-purple);
+}
+
+#BloodSpiderBody .primary-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+#BloodSpiderBody .secondary-btn {
+  background: var(--gradient-secondary);
+  color: white;
+}
+
+#BloodSpiderBody .secondary-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-blue);
+}
+
+#BloodSpiderBody .loading-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-radius: 50%;
+  border-top-color: white;
+  animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+#BloodSpiderBody .preview-area {
+  min-height: 350px;
+  max-height: 80vh;
+  border: 2px dashed var(--light-purple);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  background: var(--card-bg);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  flex: 1;
+  padding: 16px;
+}
+
+#BloodSpiderBody .preview-area.has-video {
+  border-style: solid;
+  background: transparent;
+  padding: 0;
+  justify-content: flex-start;
+  align-items: stretch;
+}
+
+#BloodSpiderBody .preview-placeholder {
+  text-align: center;
+  color: var(--text-secondary);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+#BloodSpiderBody .preview-placeholder i {
+  font-size: 48px;
+  color: var(--light-purple);
+  margin-bottom: 16px;
+  display: block;
+}
+
+#BloodSpiderBody .video-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+#BloodSpiderBody .video-player {
+  width: 100%;
+  max-width: 100%;
+  height: 0;
+  min-height: 200px;
+  max-height: 60vh;
+  flex: 1;
+  border-radius: 8px;
+  background: #000;
+  object-fit: contain;
+  aspect-ratio: 16/9;
+}
+
+/* 根据容器动态调整视频高度 */
+#BloodSpiderBody .video-player {
+  height: clamp(200px, 40vh, 500px);
+}
+
+#BloodSpiderBody .video-info {
+  margin-top: 16px;
+  padding: 16px;
+  background: var(--card-bg);
+  border-radius: 8px;
+  border: 1px solid var(--light-purple);
+  width: 100%;
+  overflow: hidden;
+  flex-shrink: 0;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+#BloodSpiderBody .video-info h4 {
+  margin: 0 0 12px 0;
+  color: var(--text-primary);
+  font-size: 16px;
+  font-weight: 600;
+  border-bottom: 1px solid var(--light-purple);
+  padding-bottom: 8px;
+}
+
+#BloodSpiderBody .video-info p {
+  margin: 0 0 8px 0;
+  color: var(--text-secondary);
+  font-size: 14px;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  line-height: 1.5;
+}
+
+#BloodSpiderBody .video-info p:last-of-type {
+  margin-bottom: 12px;
+}
+
+#BloodSpiderBody .video-info strong {
+  color: var(--text-primary);
+  font-weight: 600;
+  display: inline-block;
+  min-width: 60px;
+}
+
+#BloodSpiderBody .download-btn {
+  margin-top: 12px;
+  background: var(--gradient-secondary);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 14px;
+}
+
+#BloodSpiderBody .download-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-blue);
+}
+
+#BloodSpiderBody .error-message {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #dc2626;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-top: 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  line-height: 1.5;
+}
+
+#BloodSpiderBody .success-message {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  color: var(--matcha-green);
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-top: 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  line-height: 1.5;
+}
+
+#BloodSpiderBody .info-message {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  color: var(--sky-blue);
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-top: 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  line-height: 1.5;
+}
+
+#BloodSpiderBody .hidden {
+  display: none !important;
+}
+
+/* 响应式设计 */
+@media (max-width: 1199px) {
+  #BloodSpiderBody .video-analysis-container {
+    padding: 16px;
+  }
+  
+  #BloodSpiderBody .main-content {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  
+  #BloodSpiderBody .platform-selector {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+  
+  #BloodSpiderBody .header-banner {
+    padding: 24px 20px;
+  }
+  
+  #BloodSpiderBody .header-banner h1 {
+    font-size: 28px;
+    line-height: 1.3;
+  }
+  
+  #BloodSpiderBody .analysis-card, #BloodSpiderBody .preview-card {
+    padding: 20px;
+    min-height: 350px;
+  }
+  
+  #BloodSpiderBody .preview-area {
+    min-height: 300px;
+    max-height: 70vh;
+  }
+  
+  #BloodSpiderBody .video-player {
+    height: clamp(180px, 35vh, 400px);
+  }
+}
+
+@media (max-width: 767px) {
+  #BloodSpiderBody .video-analysis-container {
+    padding: 12px;
+  }
+  
+  #BloodSpiderBody .header-banner {
+    padding: 20px 16px;
+    margin-bottom: 20px;
+  }
+  
+  #BloodSpiderBody .header-banner h1 {
+    font-size: 22px;
+    line-height: 1.4;
+    margin-bottom: 8px;
+  }
+  
+  #BloodSpiderBody .header-banner p {
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  
+  #BloodSpiderBody .analysis-card, #BloodSpiderBody .preview-card {
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+  
+  #BloodSpiderBody .preview-area {
+    min-height: 250px;
+    max-height: 60vh;
+    padding: 12px;
+  }
+  
+  #BloodSpiderBody .platform-selector {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  
+  #BloodSpiderBody .platform-btn {
+    padding: 14px 12px;
+    min-height: 48px;
+    font-size: 14px;
+  }
+  
+  #BloodSpiderBody .platform-btn i {
+    margin-right: 6px;
+    font-size: 14px;
+  }
+  
+  #BloodSpiderBody .action-buttons {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  #BloodSpiderBody .primary-btn, #BloodSpiderBody .secondary-btn {
+    min-height: 48px;
+    font-size: 14px;
+    padding: 14px 16px;
+  }
+  
+  #BloodSpiderBody .url-input {
+    font-size: 16px; /* 防止iOS缩放 */
+    padding: 16px;
+    min-height: 48px;
+  }
+  
+  #BloodSpiderBody .video-player {
+    height: clamp(160px, 30vh, 280px);
+    min-height: 160px;
+  }
+  
+  #BloodSpiderBody .card-title {
+    font-size: 18px;
+    margin-bottom: 16px;
+  }
+  
+  #BloodSpiderBody .video-info {
+    padding: 12px;
+    max-height: 150px;
+  }
+  
+  #BloodSpiderBody .video-info p {
+    font-size: 13px;
+    line-height: 1.6;
+  }
+}
+
+@media (max-width: 480px) {
+  #BloodSpiderBody .video-analysis-container {
+    padding: 8px;
+  }
+  
+  #BloodSpiderBody .header-banner {
+    padding: 16px 12px;
+    border-radius: 12px;
+  }
+  
+  #BloodSpiderBody .header-banner h1 {
+    font-size: 20px;
+  }
+  
+  #BloodSpiderBody .header-banner p {
+    font-size: 13px;
+  }
+  
+  #BloodSpiderBody .analysis-card, #BloodSpiderBody .preview-card {
+    padding: 12px;
+    border-radius: 12px;
+  }
+  
+  #BloodSpiderBody .preview-area {
+    min-height: 200px;
+    max-height: 50vh;
+    padding: 8px;
+  }
+  
+  #BloodSpiderBody .platform-btn {
+    padding: 12px 8px;
+    font-size: 13px;
+  }
+  
+  #BloodSpiderBody .url-input {
+    padding: 14px 12px;
+  }
+  
+  #BloodSpiderBody .video-player {
+    height: clamp(140px, 25vh, 220px);
+    min-height: 140px;
+  }
+  
+  #BloodSpiderBody .video-info {
+    padding: 10px;
+    max-height: 120px;
+  }
+  
+  #BloodSpiderBody .download-btn {
+    width: 100%;
+    padding: 10px;
+    font-size: 13px;
+  }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="video-analysis-container">
+  <!-- 头部Banner -->
+  <div class="header-banner">
+    <h1><i class="iconfont icon-video"></i> 视频解析工具</h1>
+    <p>支持抖音、快手、小红书、哔哩哔哩等主流平台视频解析下载</p>
+  </div>
+
+  <!-- 主要内容区域 -->
+  <div class="main-content">
+    <!-- 解析控制面板 -->
+    <div class="analysis-card">
+      <h2 class="card-title">
+        <i class="iconfont icon-settings"></i>
+        视频解析
+      </h2>
+      
+      <!-- 平台选择 -->
+      <div class="platform-selector">
+        <div class="platform-btn active" data-platform="douyin">
+          <i class="iconfont icon-douyin"></i>
+          抖音
+        </div>
+        <div class="platform-btn" data-platform="kuaisho">
+          <i class="iconfont icon-kuaisho"></i>
+          快手
+        </div>
+        <div class="platform-btn" data-platform="xiaohoshu">
+          <i class="iconfont icon-xiaohongshu"></i>
+          小红书
+        </div>
+        <div class="platform-btn" data-platform="blbl">
+          <i class="iconfont icon-bilibili"></i>
+          哔哩哔哩
+        </div>
+      </div>
+
+      <!-- 链接输入 -->
+      <div class="input-group">
+        <label for="videoUrl">分享链接</label>
+        <input 
+          type="text" 
+          id="videoUrl" 
+          class="url-input" 
+          placeholder="请粘贴视频分享链接..." 
+          autocomplete="off"
+        />
+      </div>
+
+      <!-- 操作按钮 -->
+      <div class="action-buttons">
+        <button class="primary-btn" id="analyzeBtn">
+          <i class="iconfont icon-search"></i>
+          开始解析
+        </button>
+        <button class="secondary-btn" id="clearBtn">
+          <i class="iconfont icon-clear"></i>
+          清空内容
+        </button>
+      </div>
+
+      <!-- 状态消息 -->
+      <div id="messageArea"></div>
+    </div>
+
+    <!-- 预览区域 -->
+    <div class="preview-card">
+      <h2 class="card-title">
+        <i class="iconfont icon-play"></i>
+        视频预览
+      </h2>
+      
+      <div class="preview-area" id="previewArea">
+        <div class="preview-placeholder">
+          <i class="iconfont icon-video-camera"></i>
+          <p>选择平台并输入分享链接开始解析</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block js %}
+<script>
+// 视频解析器类
+class VideoAnalyzer {
+  constructor() {
+    this.currentPlatform = 'douyin';
+    this.isAnalyzing = false;
+    this.apiEndpoints = {
+      douyin: '/api/utils/video_analysis/douyin/video_analysis/',
+      kuaisho: '/api/utils/video_analysis/kuaisho/video_analysis/',
+      xiaohoshu: '/api/utils/video_analysis/xiaohoshu/video_analysis/',
+      blbl: '/api/utils/video_analysis/blbl/video_analysis/'
+    };
+    
+    this.platformNames = {
+      douyin: '抖音',
+      kuaisho: '快手',
+      xiaohoshu: '小红书',
+      blbl: '哔哩哔哩'
+    };
+    
+    this.init();
+  }
+
+  init() {
+    this.bindEvents();
+    this.setupAxiosConfig();
+  }
+
+  setupAxiosConfig() {
+    // 设置axios默认配置
+    axios.defaults.timeout = 30000; // 30秒超时
+    axios.defaults.headers.common['Authorization'] = 'Bearer b9391759-3d18-4edd-8768-b59abc100ba3';
+    
+    // 请求拦截器
+    axios.interceptors.request.use(
+      config => {
+        console.log('发送请求:', config);
+        return config;
+      },
+      error => {
+        console.error('请求错误:', error);
+        return Promise.reject(error);
+      }
+    );
+    
+    // 响应拦截器
+    axios.interceptors.response.use(
+      response => {
+        console.log('收到响应:', response);
+        return response;
+      },
+      error => {
+        console.error('响应错误:', error);
+        let errorMessage = '网络请求失败';
+        
+        if (error.code === 'ECONNABORTED') {
+          errorMessage = '请求超时，请检查网络连接';
+        } else if (error.response) {
+          if (error.response.status === 404) {
+            errorMessage = '接口不存在';
+          } else if (error.response.status === 500) {
+            errorMessage = '服务器内部错误';
+          } else {
+            errorMessage = `请求失败 (${error.response.status})`;
+          }
+        }
+        
+        this.showMessage(errorMessage, 'error');
+        return Promise.reject(error);
+      }
+    );
+  }
+
+  bindEvents() {
+    // 平台选择
+    document.querySelectorAll('.platform-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        this.selectPlatform(e.target.closest('.platform-btn'));
+      });
+    });
+
+    // 解析按钮
+    document.getElementById('analyzeBtn').addEventListener('click', () => {
+      this.analyzeVideo();
+    });
+
+    // 清空按钮
+    document.getElementById('clearBtn').addEventListener('click', () => {
+      this.clearContent();
+    });
+
+    // 输入框回车事件
+    document.getElementById('videoUrl').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter' && !this.isAnalyzing) {
+        this.analyzeVideo();
+      }
+    });
+
+    // 输入框变化事件
+    document.getElementById('videoUrl').addEventListener('input', (e) => {
+      this.clearMessages();
+    });
+  }
+
+  selectPlatform(btn) {
+    if (this.isAnalyzing) return;
+    
+    // 移除所有激活状态
+    document.querySelectorAll('.platform-btn').forEach(b => {
+      b.classList.remove('active');
+    });
+    
+    // 添加当前激活状态
+    btn.classList.add('active');
+    
+    // 更新当前平台
+    this.currentPlatform = btn.dataset.platform;
+    
+    // 更新占位符
+    this.updatePlaceholder();
+    
+    // 清空之前的结果
+    this.clearPreview();
+    this.clearMessages();
+  }
+
+  updatePlaceholder() {
+    const input = document.getElementById('videoUrl');
+    const placeholders = {
+      douyin: '请粘贴抖音分享链接，如：https://v.douyin.com/...',
+      kuaisho: '请粘贴快手分享链接，如：https://www.kuaishou.com/...',
+      xiaohoshu: '请粘贴小红书分享链接或分享文本...',
+      blbl: '请粘贴哔哩哔哩视频链接，如：https://www.bilibili.com/video/...'
+    };
+    
+    input.placeholder = placeholders[this.currentPlatform] || '请粘贴视频分享链接...';
+  }
+
+  async analyzeVideo() {
+    const url = document.getElementById('videoUrl').value.trim();
+    
+    if (!url) {
+      this.showMessage('请输入视频链接', 'error');
+      return;
+    }
+
+    if (this.isAnalyzing) {
+      return;
+    }
+
+    this.setAnalyzing(true);
+    this.clearMessages();
+    
+    try {
+      this.showMessage(`正在解析${this.platformNames[this.currentPlatform]}视频...`, 'info');
+      
+      const response = await axios.get(this.apiEndpoints[this.currentPlatform], {
+        params: { shared_link: url }
+      });
+      
+      if (response.data && response.data.code === 0) {
+        this.showMessage('解析成功！', 'success');
+        this.displayVideo(response.data.data, url);
+      } else {
+        const message = response.data?.message || '解析失败';
+        this.showMessage(message, 'error');
+      }
+    } catch (error) {
+      console.error('解析错误:', error);
+      // 错误已在拦截器中处理
+    } finally {
+      this.setAnalyzing(false);
+    }
+  }
+
+  displayVideo(videoData, originalUrl) {
+    const previewArea = document.getElementById('previewArea');
+    
+    previewArea.innerHTML = `
+      <div class="video-container">
+        <video class="video-player" controls preload="metadata" playsinline>
+          <source src="${this.escapeHtml(videoData.video_play_url)}" type="video/mp4">
+          您的浏览器不支持视频播放。
+        </video>
+        <div class="video-info">
+          <h4>视频信息</h4>
+          <p><strong>平台：</strong>${this.platformNames[this.currentPlatform]}</p>
+          <p><strong>原链接：</strong><span style="word-break: break-all;">${this.escapeHtml(originalUrl)}</span></p>
+          <button class="download-btn" onclick="videoAnalyzer.downloadVideo('${this.escapeHtml(videoData.video_play_url)}')">
+            <i class="iconfont icon-download"></i> 下载视频
+          </button>
+        </div>
+      </div>
+    `;
+    
+    previewArea.classList.add('has-video');
+    
+    // 等待视频元素加载完成后调整尺寸
+    const video = previewArea.querySelector('.video-player');
+    if (video) {
+      video.addEventListener('loadedmetadata', () => {
+        this.adjustVideoSize(video);
+      });
+      
+      // 监听窗口尺寸变化
+      window.addEventListener('resize', () => {
+        this.adjustVideoSize(video);
+      });
+    }
+  }
+
+  downloadVideo(videoUrl) {
+    try {
+      const link = document.createElement('a');
+      link.href = videoUrl;
+      link.download = `video_${Date.now()}.mp4`;
+      link.target = '_blank';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      this.showMessage('开始下载视频...', 'success');
+    } catch (error) {
+      console.error('下载错误:', error);
+      this.showMessage('下载失败，请右键视频另存为', 'error');
+    }
+  }
+
+  // 动态调整视频尺寸
+  adjustVideoSize(video) {
+    if (!video) return;
+    
+    const container = video.closest('.preview-area');
+    if (!container) return;
+    
+    const containerRect = container.getBoundingClientRect();
+    const maxWidth = containerRect.width - 32; // 减去内边距
+    const maxHeight = Math.min(containerRect.height * 0.7, window.innerHeight * 0.5); // 最大高度为容器的70%或视口的50%
+    
+    // 获取视频原始尺寸
+    const videoWidth = video.videoWidth || 16;
+    const videoHeight = video.videoHeight || 9;
+    const aspectRatio = videoWidth / videoHeight;
+    
+    let newWidth, newHeight;
+    
+    // 按比例计算合适的尺寸
+    if (maxWidth / aspectRatio <= maxHeight) {
+      newWidth = maxWidth;
+      newHeight = maxWidth / aspectRatio;
+    } else {
+      newHeight = maxHeight;
+      newWidth = maxHeight * aspectRatio;
+    }
+    
+    // 设置最小尺寸限制
+    newWidth = Math.max(newWidth, 200);
+    newHeight = Math.max(newHeight, 140);
+    
+    // 应用尺寸
+    video.style.width = `${newWidth}px`;
+    video.style.height = `${newHeight}px`;
+    video.style.maxWidth = '100%';
+    video.style.maxHeight = `${maxHeight}px`;
+  }
+
+  clearContent() {
+    if (this.isAnalyzing) return;
+    
+    document.getElementById('videoUrl').value = '';
+    this.clearPreview();
+    this.clearMessages();
+  }
+
+  clearPreview() {
+    const previewArea = document.getElementById('previewArea');
+    previewArea.innerHTML = `
+      <div class="preview-placeholder">
+        <i class="iconfont icon-video-camera"></i>
+        <p>选择平台并输入分享链接开始解析</p>
+      </div>
+    `;
+    previewArea.classList.remove('has-video');
+    
+    // 清理事件监听器
+    window.removeEventListener('resize', this.adjustVideoSize);
+  }
+
+  clearMessages() {
+    document.getElementById('messageArea').innerHTML = '';
+  }
+
+  showMessage(message, type = 'info') {
+    const messageArea = document.getElementById('messageArea');
+    const icons = {
+      success: 'icon-check-circle',
+      error: 'icon-close-circle',
+      info: 'icon-info-circle'
+    };
+    
+    const className = type === 'error' ? 'error-message' : 
+                     type === 'success' ? 'success-message' : 'info-message';
+    
+    messageArea.innerHTML = `
+      <div class="${className}">
+        <i class="iconfont ${icons[type] || icons.info}"></i>
+        ${this.escapeHtml(message)}
+      </div>
+    `;
+  }
+
+  setAnalyzing(analyzing) {
+    this.isAnalyzing = analyzing;
+    const analyzeBtn = document.getElementById('analyzeBtn');
+    
+    if (analyzing) {
+      analyzeBtn.disabled = true;
+      analyzeBtn.innerHTML = `
+        <div class="loading-spinner"></div>
+        解析中...
+      `;
+    } else {
+      analyzeBtn.disabled = false;
+      analyzeBtn.innerHTML = `
+        <i class="iconfont icon-search"></i>
+        开始解析
+      `;
+    }
+  }
+
+  escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+}
+
+// 初始化
+let videoAnalyzer;
+
+// 等待DOM加载完成
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', function() {
+    videoAnalyzer = new VideoAnalyzer();
+  });
+} else {
+  videoAnalyzer = new VideoAnalyzer();
+}
+</script>
+{% endblock %}
+

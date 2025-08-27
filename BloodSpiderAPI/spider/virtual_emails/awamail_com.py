@@ -27,8 +27,11 @@ class AwamailCom:
 
     # 查询邮件
     def get_email(self, cookie: dict):
+        if not cookie:
+            raise Exception("请传入cookie")
         response = requests.get(f'{self.base_url}/welcome/get_emails', cookies=cookie, headers=self.common_utils.get_headers()).json()
         get_email_format = self.virtual_email.get_email()
+        print(response)
         for item in response['data']['emails']:
             get_email_format["emails"].append({
                 "email_text": item["html_content"],

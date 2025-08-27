@@ -1,0 +1,568 @@
+{% extends "pc/template.html" %}
+
+{% block title %}
+AI音视频处理平台 - BloodSpider
+{% endblock %}
+
+{% block css %}
+{% include "pc/公共样式配置/CSS总样式.html" %}
+<style>
+/* AI音视频处理平台主题样式 */
+:root {
+  /* 紫色神秘质感系列 */
+  --primary-purple: #6366f1;
+  --secondary-purple: #8b5cf6;
+  --light-purple: #c4b5fd;
+  --dark-bg: #1e1b4b;
+  
+  /* 天蓝色清透感系列 */
+  --sky-blue: #0ea5e9;
+  --light-blue: #7dd3fc;
+  
+  /* 抹茶绿自然调系列 */
+  --matcha-green: #10b981;
+  --light-green: #6ee7b7;
+  
+  /* 功能性颜色 */
+  --text-primary: #1f2937;
+  --text-secondary: #6b7280;
+  --card-bg: rgba(99, 102, 241, 0.1);
+  --glass-bg: rgba(255, 255, 255, 0.1);
+  --shadow-purple: 0 10px 25px rgba(99, 102, 241, 0.3);
+  --shadow-blue: 0 8px 20px rgba(14, 165, 233, 0.2);
+  --gradient-primary: linear-gradient(135deg, var(--primary-purple), var(--sky-blue));
+  --gradient-secondary: linear-gradient(135deg, var(--matcha-green), var(--light-blue));
+}
+
+/* 主容器 */
+.ai-media-container {
+  background: linear-gradient(135deg, #f0f9ff 0%, #ede9fe 50%, #ecfdf5 100%);
+  min-height: 100vh;
+  padding: 20px;
+  position: relative;
+}
+
+/* 蛛网背景纹理 */
+.ai-media-container::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="spider-web" patternUnits="userSpaceOnUse" width="40" height="40"><path d="M20,5 L35,20 L20,35 L5,20 Z" fill="none" stroke="rgba(99,102,241,0.05)" stroke-width="1"/><circle cx="20" cy="20" r="2" fill="rgba(99,102,241,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23spider-web)"/></svg>') repeat;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* 头部Banner */
+.platform-header {
+  background: var(--gradient-primary);
+  border-radius: 20px;
+  padding: 40px;
+  margin-bottom: 32px;
+  color: white;
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+  box-shadow: var(--shadow-purple);
+}
+
+.platform-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="header-pattern" patternUnits="userSpaceOnUse" width="30" height="30"><path d="M15,3 L27,15 L15,27 L3,15 Z" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.8"/></pattern></defs><rect width="100" height="100" fill="url(%23header-pattern)"/></svg>') repeat;
+  opacity: 0.4;
+}
+
+.header-content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+}
+
+.platform-title {
+  font-size: 36px;
+  font-weight: bold;
+  margin-bottom: 12px;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+.platform-subtitle {
+  font-size: 18px;
+  opacity: 0.9;
+  line-height: 1.6;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.platform-features {
+  display: flex;
+  justify-content: center;
+  gap: 32px;
+  margin-top: 24px;
+  flex-wrap: wrap;
+}
+
+.feature-badge {
+  background: rgba(255,255,255,0.2);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 25px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* 功能导航区域 */
+.function-navigation {
+  background: var(--glass-bg);
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 32px;
+  box-shadow: var(--shadow-blue);
+  position: relative;
+  z-index: 1;
+}
+
+.nav-title {
+  font-size: 20px;
+  font-weight: bold;
+  color: var(--text-primary);
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.function-tabs {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.function-tab {
+  padding: 12px 24px;
+  border: 2px solid var(--primary-purple);
+  border-radius: 30px;
+  background: transparent;
+  color: var(--primary-purple);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 140px;
+  justify-content: center;
+  text-decoration: none;
+}
+
+.function-tab:hover {
+  background: var(--primary-purple);
+  color: white;
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-purple);
+}
+
+.function-tab.active {
+  background: var(--gradient-primary);
+  color: white;
+  box-shadow: var(--shadow-purple);
+}
+
+.function-tab .iconfont {
+  font-size: 16px;
+}
+
+/* 内容区域 */
+.content-area {
+  position: relative;
+  z-index: 1;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.tab-content {
+  display: none;
+}
+
+.tab-content.active {
+  display: block;
+  animation: fadeInUp 0.5s ease;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 功能介绍卡片 */
+.feature-overview {
+  background: white;
+  border-radius: 16px;
+  padding: 32px;
+  margin-bottom: 24px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+  border: 1px solid var(--light-purple);
+  position: relative;
+  z-index: 1;
+}
+
+.overview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+}
+
+.feature-card {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(14, 165, 233, 0.05));
+  border-radius: 12px;
+  padding: 24px;
+  border: 1px solid var(--light-blue);
+  transition: all 0.3s ease;
+  text-align: center;
+}
+
+.feature-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-blue);
+}
+
+.feature-icon {
+  width: 60px;
+  height: 60px;
+  background: var(--gradient-secondary);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.feature-icon .iconfont {
+  font-size: 24px;
+  color: white;
+}
+
+.feature-title {
+  font-size: 16px;
+  font-weight: bold;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.feature-desc {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+/* 响应式设计 */
+@media (max-width: 1199px) {
+  .ai-media-container {
+    padding: 16px;
+  }
+  
+  .platform-header {
+    padding: 30px 24px;
+  }
+  
+  .platform-title {
+    font-size: 28px;
+  }
+  
+  .platform-features {
+    gap: 16px;
+  }
+}
+
+@media (max-width: 767px) {
+  .ai-media-container {
+    padding: 12px;
+  }
+  
+  .platform-header {
+    padding: 24px 20px;
+    margin-bottom: 20px;
+  }
+  
+  .platform-title {
+    font-size: 24px;
+  }
+  
+  .platform-subtitle {
+    font-size: 16px;
+  }
+  
+  .platform-features {
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+  
+  .function-tabs {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .function-tab {
+    min-width: 200px;
+  }
+  
+  .overview-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .feature-overview {
+    padding: 20px;
+  }
+}
+
+/* 加载动画 */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.loading {
+  animation: pulse 2s ease-in-out infinite;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="ai-media-container">
+    <!-- 平台头部Banner -->
+    <div class="platform-header">
+        <div class="header-content">
+            <h1 class="platform-title">
+                <i class="layui-icon layui-icon-face-smile"></i>
+                AI音视频处理平台
+            </h1>
+            <p class="platform-subtitle">
+                基于先进的人工智能技术，提供专业的音视频处理服务<br>
+                支持文字转语音、语音识别、视频翻译、人声分离等多种功能
+            </p>
+            <div class="platform-features">
+                <div class="feature-badge">
+                    <i class="layui-icon layui-icon-fire"></i>
+                    AI驱动
+                </div>
+                <div class="feature-badge">
+                    <i class="layui-icon layui-icon-rate"></i>
+                    高效处理
+                </div>
+                <div class="feature-badge">
+                    <i class="layui-icon layui-icon-diamond"></i>
+                    专业品质
+                </div>
+                <div class="feature-badge">
+                    <i class="layui-icon layui-icon-vercode"></i>
+                    安全可靠
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 功能导航 -->
+    <div class="function-navigation">
+        <h2 class="nav-title">选择处理功能</h2>
+        <div class="function-tabs">
+            <a href="#" class="function-tab active" data-tab="text-to-speech">
+                <i class="layui-icon layui-icon-voice"></i>
+                文字转语音
+            </a>
+            <a href="#" class="function-tab" data-tab="speech-to-text">
+                <i class="layui-icon layui-icon-mike"></i>
+                语音转文字
+            </a>
+            <a href="#" class="function-tab" data-tab="video-translation">
+                <i class="iconfont icon-translate"></i>
+                视频翻译
+            </a>
+            <a href="#" class="function-tab" data-tab="voice-separation">
+                <i class="layui-icon layui-icon-music"></i>
+                人声分离
+            </a>
+        </div>
+    </div>
+
+    <!-- 内容区域 -->
+    <div class="content-area">
+        <!-- 文字转语音 -->
+        <div id="text-to-speech" class="tab-content active">
+            {% include "pc/页面/音视频处理/文字转语音.html" %}
+        </div>
+
+        <!-- 语音转文字 -->
+        <div id="speech-to-text" class="tab-content">
+            {% include "pc/页面/音视频处理/语音转文字.html" %}
+        </div>
+
+        <!-- 视频翻译 -->
+        <div id="video-translation" class="tab-content">
+            <div class="feature-overview">
+                <div class="overview-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="layui-icon layui-icon-video"></i>
+                        </div>
+                        <h3 class="feature-title">视频智能翻译</h3>
+                        <p class="feature-desc">支持多语言视频内容翻译，保持原始音色</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="iconfont icon-language"></i>
+                        </div>
+                        <h3 class="feature-title">多语言支持</h3>
+                        <p class="feature-desc">支持中英日韩等多种语言互译</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="layui-icon layui-icon-refresh-1"></i>
+                        </div>
+                        <h3 class="feature-title">口型同步</h3>
+                        <p class="feature-desc">AI技术确保翻译语音与口型完美同步</p>
+                    </div>
+                </div>
+                <div style="text-align: center; margin-top: 24px; color: var(--text-secondary);">
+                    <i class="layui-icon layui-icon-loading-1" style="font-size: 48px; margin-bottom: 16px;"></i>
+                    <p style="font-size: 16px;">视频翻译功能正在开发中，敬请期待...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 人声分离 -->
+        <div id="voice-separation" class="tab-content">
+            {% include "pc/页面/音视频处理/人声分离.html" %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block footer %}
+{% endblock %}
+
+{% block js %}
+{% include "pc/公共样式配置/JS总样式.html" %}
+<script>
+// AI音视频处理平台功能切换
+document.addEventListener('DOMContentLoaded', function() {
+    const functionTabs = document.querySelectorAll('.function-tab');
+    const tabContents = document.querySelectorAll('.tab-content');
+
+    // 标签页切换功能
+    functionTabs.forEach(tab => {
+        tab.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            const targetTab = this.getAttribute('data-tab');
+            
+            // 移除所有活动状态
+            functionTabs.forEach(t => t.classList.remove('active'));
+            tabContents.forEach(content => content.classList.remove('active'));
+            
+            // 添加当前活动状态
+            this.classList.add('active');
+            const targetContent = document.getElementById(targetTab);
+            if (targetContent) {
+                targetContent.classList.add('active');
+            }
+            
+            // 滚动到内容区域
+            document.querySelector('.content-area').scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
+        });
+    });
+
+    // 页面加载动画
+    const cards = document.querySelectorAll('.feature-card');
+    cards.forEach((card, index) => {
+        card.style.animationDelay = `${index * 0.1}s`;
+    });
+
+    // 添加页面滚动效果
+    let ticking = false;
+    
+    function updateScrollEffect() {
+        const scrolled = window.pageYOffset;
+        const header = document.querySelector('.platform-header');
+        
+        if (header) {
+            const rate = scrolled * -0.5;
+            header.style.transform = `translateY(${rate}px)`;
+        }
+        
+        ticking = false;
+    }
+    
+    window.addEventListener('scroll', function() {
+        if (!ticking) {
+            requestAnimationFrame(updateScrollEffect);
+            ticking = true;
+        }
+    });
+
+    // 添加浏览器兼容性检查
+    function checkBrowserSupport() {
+        const isSupported = {
+            fetch: typeof fetch !== 'undefined',
+            audio: !!document.createElement('audio').canPlayType,
+            css3: typeof document.documentElement.style.transform !== 'undefined'
+        };
+        
+        if (!isSupported.fetch || !isSupported.audio) {
+            layui.use('layer', function(){
+                var layer = layui.layer;
+                layer.msg('您的浏览器版本过低，部分功能可能无法正常使用，建议升级到最新版本', {icon: 0});
+            });
+        }
+    }
+    
+    checkBrowserSupport();
+
+    // 错误处理和用户提示
+    window.addEventListener('error', function(e) {
+        console.error('页面错误:', e.error);
+    });
+
+    // 网络状态监听
+    if ('onLine' in navigator) {
+        function updateNetworkStatus() {
+            if (!navigator.onLine) {
+                layui.use('layer', function(){
+                    var layer = layui.layer;
+                    layer.msg('网络连接已断开，请检查网络设置', {icon: 2, time: 3000});
+                });
+            }
+        }
+        
+        window.addEventListener('online', updateNetworkStatus);
+        window.addEventListener('offline', updateNetworkStatus);
+    }
+});
+</script>
+{% endblock %}
+

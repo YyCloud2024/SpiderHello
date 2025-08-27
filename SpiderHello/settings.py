@@ -32,6 +32,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'corsheaders',
     'BloodSpiderAPI.apps.BloodSpiderAPIConfig',
+    'BloodSpiderWeb.apps.BloodspiderwebConfig',
 ]
 
 MIDDLEWARE = [
@@ -113,12 +114,12 @@ USE_TZ = False
 
 # 静态文件配置
 """
-如果是在本地开发,推荐 STATIC_ROOT = os.path.join(BASE_DIR, 'BloodSpider/static')
+如果是在本地开发,推荐 STATIC_ROOT = os.path.join(BASE_DIR, 'BloodSpiderWeb/static')
 如果是部署到服务器, 推荐 STATIC_ROOT = os.path.join(BASE_DIR, 'collected_static')
     部署前运行python manage.py collectstatic命令
 """
 STATIC_URL = 'static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'BloodSpider/static')
+STATIC_ROOT = os.path.join(BASE_DIR, 'BloodSpiderWeb/static')
 # STATIC_ROOT = os.path.join(BASE_DIR, 'collected_static')
 # STATICFILES_DIRS = [
 #     os.path.join(BASE_DIR, "BlackWidow",'static'),
@@ -132,3 +133,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
+
+# 当前版本
+SPIDERHELLO_VERSION = '1.0.0'
+
+# 管理员微信
+ADMIN_WECHAT = 'duyanbz'

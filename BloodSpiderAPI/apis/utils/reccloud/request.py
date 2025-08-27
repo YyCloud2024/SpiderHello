@@ -46,8 +46,26 @@ def tastasksks_audio_speech_create(request):
     text = request.POST.get("text")
     if not text:
         return response_dict(code=400, message="缺少必要参数 'text'")
+    
+    # 获取可选参数
+    voice = request.POST.get("voice", "XiaoxiaoMultilingual")
+    volume = int(request.POST.get("volume", 100))
+    rate = int(float(request.POST.get("rate", 100)) / 100)  # 将百分比转换为倍数，然后转为整数
+    background_music = request.POST.get("background_music")
+    
+    # 构建背景音乐参数
+    bg_music_dict = None
+    if background_music:
+        bg_music_dict = {"background_music": background_music}
+    
     try:
-        task_response = reccloud.stasksks_audio_speech(text)
+        task_response = reccloud.stasksks_audio_speech(
+            text=text,
+            voice=voice,
+            volume=volume,
+            rate=rate,
+            background_music=bg_music_dict
+        )
         if task_response is None:
             return response_dict(code=500, message="任务创建失败，请稍后重试")
         return response_dict(message="创建任务成功,正在转换中", data=task_response)

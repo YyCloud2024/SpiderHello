@@ -1,0 +1,1243 @@
+{% extends "pc/template.html" %}
+
+{% block title %}
+翻译首页 - 蛛网翻译平台
+{% endblock %}
+
+{% block css %}
+<style>
+/* 主题色彩配置 - 融合紫色神秘质感、天蓝色清透感与抹茶绿 */
+:root {
+  --primary-purple: #6366f1;
+  --secondary-purple: #8b5cf6;
+  --light-purple: #c4b5fd;
+  --sky-blue: #0ea5e9;
+  --light-blue: #7dd3fc;
+  --matcha-green: #10b981;
+  --light-green: #6ee7b7;
+  --dark-bg: #1e1b4b;
+  --card-bg: rgba(99, 102, 241, 0.1);
+  --glass-bg: rgba(255, 255, 255, 0.1);
+  --text-primary: #1f2937;
+  --text-secondary: #6b7280;
+  --shadow-purple: 0 10px 25px rgba(99, 102, 241, 0.3);
+  --shadow-blue: 0 8px 20px rgba(14, 165, 233, 0.2);
+  --gradient-primary: linear-gradient(135deg, var(--primary-purple), var(--sky-blue));
+  --gradient-secondary: linear-gradient(135deg, var(--matcha-green), var(--light-blue));
+}
+
+/* 翻译页面主容器 */
+.translate-container {
+  background: linear-gradient(135deg, #f0f9ff 0%, #ede9fe 50%, #ecfdf5 100%);
+  min-height: 100vh;
+  padding: 20px;
+}
+
+/* 头部区域 */
+.translate-header {
+  background: var(--gradient-primary);
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: var(--shadow-purple);
+  color: white;
+  position: relative;
+  overflow: hidden;
+}
+
+.translate-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="spider" patternUnits="userSpaceOnUse" width="20" height="20"><path d="M10,2 L18,10 L10,18 L2,10 Z" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23spider)"/></svg>') repeat;
+  opacity: 0.3;
+}
+
+.translate-header .content {
+  position: relative;
+  z-index: 1;
+}
+
+.translate-title {
+  font-size: 28px;
+  font-weight: bold;
+  margin-bottom: 8px;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.translate-subtitle {
+  font-size: 16px;
+  opacity: 0.9;
+}
+
+/* 线路切换区域 */
+.route-switcher {
+  background: var(--glass-bg);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 24px;
+  box-shadow: var(--shadow-blue);
+}
+
+.route-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.route-tab {
+  padding: 10px 20px;
+  border: 2px solid var(--primary-purple);
+  border-radius: 25px;
+  background: transparent;
+  color: var(--primary-purple);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 500;
+  min-width: 120px;
+  text-align: center;
+}
+
+.route-tab:hover {
+  background: var(--primary-purple);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-purple);
+}
+
+.route-tab.active {
+  background: var(--gradient-primary);
+  color: white;
+  box-shadow: var(--shadow-purple);
+}
+
+/* 语言选择区域 */
+.language-section {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  border: 1px solid var(--light-purple);
+}
+
+.language-selector {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 16px;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.language-select {
+  padding: 12px 16px;
+  border: 2px solid var(--light-purple);
+  border-radius: 8px;
+  font-size: 16px;
+  background: white;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.language-select:focus {
+  outline: none;
+  border-color: var(--primary-purple);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.language-swap {
+  width: 44px;
+  height: 44px;
+  background: var(--gradient-secondary);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  font-size: 18px;
+}
+
+.language-swap:hover {
+  transform: rotate(180deg) scale(1.1);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+}
+
+/* 翻译输入区域 */
+.translate-section {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  border: 1px solid var(--light-blue);
+}
+
+.translate-panels {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.translate-panel {
+  border: 2px solid var(--light-purple);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.translate-panel:focus-within {
+  border-color: var(--primary-purple);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.panel-header {
+  background: var(--card-bg);
+  padding: 12px 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.panel-textarea {
+  width: 100%;
+  min-height: 150px;
+  padding: 16px;
+  border: none;
+  outline: none;
+  resize: vertical;
+  font-size: 16px;
+  line-height: 1.5;
+  font-family: inherit;
+}
+
+.panel-footer {
+  background: #f9fafb;
+  padding: 8px 16px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.char-count {
+  font-family: monospace;
+}
+
+.panel-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.action-btn {
+  padding: 4px 8px;
+  background: transparent;
+  border: 1px solid var(--light-purple);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 12px;
+}
+
+.action-btn:hover {
+  background: var(--primary-purple);
+  color: white;
+  border-color: var(--primary-purple);
+}
+
+/* 翻译控制区域 */
+.translate-controls {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.translate-btn {
+  padding: 12px 24px;
+  background: var(--gradient-primary);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  min-width: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.translate-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-purple);
+}
+
+.translate-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.clear-btn {
+  background: var(--gradient-secondary);
+}
+
+.clear-btn:hover {
+  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.3);
+}
+
+/* 翻译历史区域 */
+.history-section {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  border: 1px solid var(--light-green);
+}
+
+.section-title {
+  font-size: 20px;
+  font-weight: bold;
+  color: var(--text-primary);
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid var(--light-purple);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.history-list {
+  display: grid;
+  gap: 12px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.history-item {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 16px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.02), rgba(14, 165, 233, 0.02));
+}
+
+.history-item:hover {
+  border-color: var(--primary-purple);
+  box-shadow: var(--shadow-purple);
+  transform: translateY(-1px);
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(14, 165, 233, 0.05));
+}
+
+.history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.history-route {
+  font-size: 12px;
+  background: var(--gradient-primary);
+  color: white;
+  padding: 2px 8px;
+  border-radius: 12px;
+}
+
+.history-time {
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-family: monospace;
+}
+
+.history-content {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 12px;
+  align-items: center;
+}
+
+.history-text {
+  font-size: 14px;
+  color: var(--text-primary);
+  line-height: 1.4;
+  max-height: 60px;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+
+.history-arrow {
+  color: var(--primary-purple);
+  font-size: 16px;
+}
+
+/* 加载和空状态 */
+.loading {
+  text-align: center;
+  padding: 40px;
+  color: var(--text-secondary);
+}
+
+.loading-spinner {
+  display: inline-block;
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--light-purple);
+  border-top: 3px solid var(--primary-purple);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 12px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-secondary);
+}
+
+.empty-icon {
+  font-size: 48px;
+  color: var(--light-purple);
+  margin-bottom: 16px;
+}
+
+/* 响应式设计 */
+@media (max-width: 1199px) {
+  .translate-container {
+    padding: 16px;
+  }
+  
+  .translate-header {
+    padding: 20px;
+  }
+  
+  .translate-title {
+    font-size: 24px;
+  }
+  
+  .translate-panels {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .language-selector {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+}
+
+@media (max-width: 767px) {
+  .translate-container {
+    padding: 12px;
+  }
+  
+  .translate-header {
+    padding: 16px;
+  }
+  
+  .translate-title {
+    font-size: 20px;
+  }
+  
+  .route-tabs {
+    justify-content: center;
+  }
+  
+  .route-tab {
+    min-width: 100px;
+    font-size: 14px;
+    padding: 8px 16px;
+  }
+  
+  .translate-controls {
+    flex-direction: column;
+  }
+  
+  .translate-btn {
+    width: 100%;
+  }
+  
+  .history-content {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+  
+  .history-arrow {
+    transform: rotate(90deg);
+  }
+}
+
+/* 触控优化 */
+@media (max-width: 767px) {
+  .route-tab,
+  .translate-btn,
+  .language-swap,
+  .action-btn {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* 高分辨率适配 */
+@media (min-width: 1400px) {
+  .translate-container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+}
+
+/* 自定义滚动条 */
+.history-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.history-list::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 3px;
+}
+
+.history-list::-webkit-scrollbar-thumb {
+  background: var(--primary-purple);
+  border-radius: 3px;
+}
+
+.history-list::-webkit-scrollbar-thumb:hover {
+  background: var(--secondary-purple);
+}
+
+/* 动画效果 */
+.fade-in {
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.slide-in {
+  animation: slideIn 0.4s ease;
+}
+
+@keyframes slideIn {
+  from { transform: translateX(-20px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="translate-container">
+  <!-- 头部区域 -->
+  <div class="translate-header">
+    <div class="content">
+      <h1 class="translate-title">
+        <i class="layui-icon layui-icon-fonts-code"></i>
+        蛛网翻译
+      </h1>
+      <p class="translate-subtitle">跨越语言边界，连接世界文明</p>
+    </div>
+  </div>
+
+  <!-- 线路切换区域 -->
+  <div class="route-switcher">
+    <h3 style="margin-bottom: 16px; color: var(--text-primary); font-weight: 600;">
+      <i class="layui-icon layui-icon-website"></i>
+      翻译线路选择
+    </h3>
+    <div class="route-tabs">
+      <div class="route-tab active" data-route="youdao">
+        <i class="layui-icon layui-icon-fonts-code"></i>
+        有道翻译
+      </div>
+      <div class="route-tab" data-route="coming_soon_1">
+        <i class="layui-icon layui-icon-transfer"></i>
+        谷歌翻译
+        <span style="font-size: 10px; opacity: 0.7;">(即将上线)</span>
+      </div>
+      <div class="route-tab" data-route="coming_soon_2">
+        <i class="layui-icon layui-icon-dialogue"></i>
+        百度翻译
+        <span style="font-size: 10px; opacity: 0.7;">(即将上线)</span>
+      </div>
+    </div>
+    <div class="route-info">
+      <p style="color: var(--text-secondary); margin: 0; font-size: 14px;">
+        <i class="layui-icon layui-icon-tips"></i>
+        当前选择: <span id="current-route-name">有道翻译</span> - 提供专业准确的翻译服务
+      </p>
+    </div>
+  </div>
+
+  <!-- 语言选择区域 -->
+  <div class="language-section">
+    <h3 style="margin-bottom: 16px; color: var(--text-primary); font-weight: 600;">
+      <i class="layui-icon layui-icon-set"></i>
+      语言选择
+    </h3>
+    <div class="language-selector">
+      <select class="language-select" id="source-language">
+        <option value="AUTO">自动检测</option>
+      </select>
+      <button class="language-swap" id="swap-languages" title="交换语言">
+        <i class="layui-icon layui-icon-refresh-1"></i>
+      </button>
+      <select class="language-select" id="target-language">
+        <option value="EN">英语</option>
+      </select>
+    </div>
+    <div style="text-align: center; color: var(--text-secondary); font-size: 14px;">
+      <i class="layui-icon layui-icon-tips"></i>
+      <span id="language-status">正在加载支持的语言...</span>
+    </div>
+  </div>
+
+  <!-- 翻译输入区域 -->
+  <div class="translate-section">
+    <h3 class="section-title">
+      <i class="layui-icon layui-icon-edit"></i>
+      文本翻译
+    </h3>
+    <div class="translate-panels">
+      <!-- 源文本面板 -->
+      <div class="translate-panel">
+        <div class="panel-header">
+          <i class="layui-icon layui-icon-edit"></i>
+          <span id="source-label">原文 (自动检测)</span>
+        </div>
+        <textarea 
+          class="panel-textarea" 
+          id="source-text"
+          placeholder="在此输入要翻译的文本..."
+          maxlength="5000"
+        ></textarea>
+        <div class="panel-footer">
+          <span class="char-count">
+            <span id="source-count">0</span>/5000
+          </span>
+          <div class="panel-actions">
+            <button class="action-btn" id="paste-btn" title="粘贴">
+              <i class="layui-icon layui-icon-template-1"></i>
+            </button>
+            <button class="action-btn" id="clear-source-btn" title="清空">
+              <i class="layui-icon layui-icon-delete"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 译文面板 -->
+      <div class="translate-panel">
+        <div class="panel-header">
+          <i class="layui-icon layui-icon-fonts-code"></i>
+          <span id="target-label">译文 (英语)</span>
+        </div>
+        <textarea 
+          class="panel-textarea" 
+          id="target-text"
+          placeholder="翻译结果将在此显示..."
+          readonly
+        ></textarea>
+        <div class="panel-footer">
+          <span class="char-count">
+            <span id="target-count">0</span> 字符
+          </span>
+          <div class="panel-actions">
+            <button class="action-btn" id="copy-btn" title="复制译文">
+              <i class="layui-icon layui-icon-template"></i>
+            </button>
+            <button class="action-btn" id="clear-target-btn" title="清空译文">
+              <i class="layui-icon layui-icon-delete"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 翻译控制 -->
+    <div class="translate-controls">
+      <button class="translate-btn" id="translate-btn">
+        <i class="layui-icon layui-icon-ok"></i>
+        开始翻译
+      </button>
+      <button class="clear-btn translate-btn" id="clear-all-btn">
+        <i class="layui-icon layui-icon-refresh-3"></i>
+        清空所有
+      </button>
+    </div>
+  </div>
+
+  <!-- 翻译历史区域 -->
+  <div class="history-section">
+    <h3 class="section-title">
+      <i class="layui-icon layui-icon-time"></i>
+      翻译历史
+    </h3>
+    <div id="history-container">
+      <div class="empty-state">
+        <div class="empty-icon">
+          <i class="layui-icon layui-icon-time"></i>
+        </div>
+        <p style="font-size: 16px; margin: 0;">暂无翻译历史</p>
+        <p style="font-size: 14px; margin: 8px 0 0 0; opacity: 0.7;">开始翻译后，历史记录将在此显示</p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block footer %}
+<!-- 底部信息 -->
+<div style="text-align: center; padding: 20px; color: var(--text-secondary); font-size: 14px;">
+  <p>🕷️ 蛛网翻译平台 - 打破语言壁垒，畅通全球交流</p>
+</div>
+{% endblock %}
+
+{% block js %}
+<script>
+layui.use(['layer'], function(){
+  const layer = layui.layer;
+  
+  // 全局变量
+  let currentRoute = 'youdao';
+  let supportedLanguages = [];
+  let translateHistory = [];
+  let isTranslating = false;
+  
+  // API配置
+  const API_CONFIG = {
+    youdao: {
+      getLanguages: '/api/translation/m_youdao_com_get_language/',
+      translate: '/api/translation/m_youdao_com_translate/'
+    }
+  };
+  
+  // DOM元素
+  const routeTabs = document.querySelectorAll('.route-tab');
+  const currentRouteName = document.getElementById('current-route-name');
+  const sourceLanguageSelect = document.getElementById('source-language');
+  const targetLanguageSelect = document.getElementById('target-language');
+  const swapLanguagesBtn = document.getElementById('swap-languages');
+  const languageStatus = document.getElementById('language-status');
+  const sourceText = document.getElementById('source-text');
+  const targetText = document.getElementById('target-text');
+  const sourceCount = document.getElementById('source-count');
+  const targetCount = document.getElementById('target-count');
+  const sourceLabel = document.getElementById('source-label');
+  const targetLabel = document.getElementById('target-label');
+  const translateBtn = document.getElementById('translate-btn');
+  const clearAllBtn = document.getElementById('clear-all-btn');
+  const pasteBtn = document.getElementById('paste-btn');
+  const copyBtn = document.getElementById('copy-btn');
+  const clearSourceBtn = document.getElementById('clear-source-btn');
+  const clearTargetBtn = document.getElementById('clear-target-btn');
+  const historyContainer = document.getElementById('history-container');
+  
+  // 初始化
+  init();
+  
+  function init() {
+    bindEvents();
+    loadSupportedLanguages();
+    loadTranslateHistory();
+  }
+  
+  // 绑定事件
+  function bindEvents() {
+    // 线路切换
+    routeTabs.forEach(tab => {
+      tab.addEventListener('click', handleRouteChange);
+    });
+    
+    // 语言选择
+    sourceLanguageSelect.addEventListener('change', updateLanguageLabels);
+    targetLanguageSelect.addEventListener('change', updateLanguageLabels);
+    swapLanguagesBtn.addEventListener('click', swapLanguages);
+    
+    // 文本输入
+    sourceText.addEventListener('input', handleSourceTextChange);
+    sourceText.addEventListener('keydown', handleKeyDown);
+    
+    // 按钮事件
+    translateBtn.addEventListener('click', handleTranslate);
+    clearAllBtn.addEventListener('click', clearAll);
+    pasteBtn.addEventListener('click', pasteText);
+    copyBtn.addEventListener('click', copyTranslation);
+    clearSourceBtn.addEventListener('click', clearSourceText);
+    clearTargetBtn.addEventListener('click', clearTargetText);
+  }
+  
+  // 处理路线切换
+  function handleRouteChange(e) {
+    const routeData = e.target.dataset.route;
+    
+    // 检查是否是即将上线的路线
+    if (routeData && routeData.startsWith('coming_soon')) {
+      layer.msg('该翻译线路即将上线，敬请期待！', {icon: 6});
+      return;
+    }
+    
+    if (routeData === currentRoute) return;
+    
+    // 更新激活状态
+    routeTabs.forEach(tab => tab.classList.remove('active'));
+    e.target.classList.add('active');
+    
+    // 更新当前路线
+    currentRoute = routeData;
+    updateRouteDisplay();
+    
+    // 重新加载支持的语言
+    loadSupportedLanguages();
+  }
+  
+  // 更新路线显示
+  function updateRouteDisplay() {
+    const routeNames = {
+      youdao: '有道翻译'
+    };
+    currentRouteName.textContent = routeNames[currentRoute] || '未知路线';
+  }
+  
+  // 加载支持的语言
+  async function loadSupportedLanguages() {
+    try {
+      languageStatus.textContent = '正在加载支持的语言...';
+      
+      const config = API_CONFIG[currentRoute];
+      if (!config) {
+        throw new Error('不支持的翻译路线');
+      }
+      
+      const response = await axios.post(config.getLanguages, {}, {
+        timeout: 30000,
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        }
+      });
+      
+      if (response.data && response.data.code === 0) {
+        supportedLanguages = response.data.data || [];
+        updateLanguageOptions();
+        languageStatus.textContent = `已加载 ${supportedLanguages.length} 种语言`;
+      } else {
+        throw new Error(response.data?.message || '获取语言列表失败');
+      }
+    } catch (error) {
+      console.error('加载语言列表失败:', error);
+      languageStatus.textContent = '加载语言列表失败，请刷新页面重试';
+      layer.msg('获取支持语言失败: ' + (error.message || '未知错误'), {icon: 2});
+    }
+  }
+  
+  // 更新语言选项
+  function updateLanguageOptions() {
+    // 清空现有选项
+    sourceLanguageSelect.innerHTML = '';
+    targetLanguageSelect.innerHTML = '';
+    
+    // 添加语言选项
+    supportedLanguages.forEach(lang => {
+      const sourceOption = new Option(lang.name, lang.value);
+      const targetOption = new Option(lang.name, lang.value);
+      
+      sourceLanguageSelect.appendChild(sourceOption);
+      targetLanguageSelect.appendChild(targetOption);
+    });
+    
+    // 设置默认值
+    if (supportedLanguages.length > 0) {
+      sourceLanguageSelect.value = 'AUTO';
+      // 找到英语选项作为默认目标语言
+      const englishOption = supportedLanguages.find(lang => 
+        lang.value.includes('EN') || lang.name.includes('英')
+      );
+      if (englishOption) {
+        targetLanguageSelect.value = englishOption.value;
+      }
+    }
+    
+    updateLanguageLabels();
+  }
+  
+  // 更新语言标签
+  function updateLanguageLabels() {
+    const sourceOption = sourceLanguageSelect.options[sourceLanguageSelect.selectedIndex];
+    const targetOption = targetLanguageSelect.options[targetLanguageSelect.selectedIndex];
+    
+    if (sourceOption) {
+      sourceLabel.textContent = `原文 (${sourceOption.text})`;
+    }
+    if (targetOption) {
+      targetLabel.textContent = `译文 (${targetOption.text})`;
+    }
+  }
+  
+  // 交换语言
+  function swapLanguages() {
+    if (sourceLanguageSelect.value === 'AUTO') {
+      layer.msg('自动检测语言无法交换', {icon: 0});
+      return;
+    }
+    
+    const sourceValue = sourceLanguageSelect.value;
+    const targetValue = targetLanguageSelect.value;
+    
+    sourceLanguageSelect.value = targetValue;
+    targetLanguageSelect.value = sourceValue;
+    
+    updateLanguageLabels();
+    
+    // 交换文本内容
+    const sourceTextValue = sourceText.value;
+    const targetTextValue = targetText.value;
+    
+    sourceText.value = targetTextValue;
+    targetText.value = sourceTextValue;
+    
+    handleSourceTextChange();
+    updateTargetCount();
+  }
+  
+  // 处理源文本变化
+  function handleSourceTextChange() {
+    const text = sourceText.value;
+    sourceCount.textContent = text.length;
+  }
+  
+  // 更新目标文本计数
+  function updateTargetCount() {
+    targetCount.textContent = targetText.value.length;
+  }
+  
+  // 处理键盘事件
+  function handleKeyDown(e) {
+    // Ctrl+Enter 快捷翻译
+    if (e.ctrlKey && e.key === 'Enter') {
+      e.preventDefault();
+      handleTranslate();
+    }
+  }
+  
+  // 处理翻译
+  async function handleTranslate() {
+    const text = sourceText.value.trim();
+    
+    if (!text) {
+      layer.msg('请输入要翻译的文本', {icon: 0});
+      sourceText.focus();
+      return;
+    }
+    
+    if (isTranslating) {
+      layer.msg('翻译中，请稍候...', {icon: 16});
+      return;
+    }
+    
+    if (text.length > 5000) {
+      layer.msg('文本过长，请保持在5000字符以内', {icon: 2});
+      return;
+    }
+    
+    try {
+      isTranslating = true;
+      updateTranslateButton(true);
+      
+      const sourceLanguage = sourceLanguageSelect.value;
+      const targetLanguage = targetLanguageSelect.value;
+      
+      // 检查语言选择
+      if (sourceLanguage === targetLanguage && sourceLanguage !== 'AUTO') {
+        layer.msg('源语言和目标语言不能相同', {icon: 0});
+        return;
+      }
+      
+      const config = API_CONFIG[currentRoute];
+      if (!config) {
+        throw new Error('不支持的翻译路线');
+      }
+      
+      // 构建请求参数
+      const requestData = {
+        text: text,
+        type_language: currentRoute === 'youdao' ? getYoudaoLanguageType(sourceLanguage, targetLanguage) : targetLanguage
+      };
+      
+      const response = await axios.post(config.translate, requestData, {
+        timeout: 30000,
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        }
+      });
+      
+      if (response.data && response.data.code === 0) {
+        const translatedText = response.data.data?.translate_text || '';
+        targetText.value = translatedText;
+        updateTargetCount();
+        
+        // 添加到历史记录
+        addToHistory({
+          source: text,
+          target: translatedText,
+          sourceLanguage: sourceLanguage,
+          targetLanguage: targetLanguage,
+          route: currentRoute,
+          timestamp: new Date().getTime()
+        });
+        
+        layer.msg('翻译完成！', {icon: 1});
+      } else {
+        throw new Error(response.data?.message || '翻译失败');
+      }
+    } catch (error) {
+      console.error('翻译错误:', error);
+      layer.msg('翻译失败: ' + (error.message || '未知错误'), {icon: 2});
+      
+      if (error.code === 'ECONNABORTED') {
+        layer.msg('请求超时，请检查网络连接', {icon: 2});
+      }
+    } finally {
+      isTranslating = false;
+      updateTranslateButton(false);
+    }
+  }
+  
+  // 获取有道翻译语言类型
+  function getYoudaoLanguageType(source, target) {
+    if (source === 'AUTO') {
+      return 'AUTO';
+    }
+    
+    // 根据源语言和目标语言构建类型
+    const langMap = {
+      'ZH_CN': 'ZH_CN',
+      'EN': 'EN',
+      'JA': 'JA',
+      'KR': 'KR',
+      'FR': 'FR',
+      'RU': 'RU',
+      'SP': 'SP'
+    };
+    
+    const sourceCode = langMap[source] || source;
+    const targetCode = langMap[target] || target;
+    
+    if (sourceCode && targetCode) {
+      return `${sourceCode}2${targetCode}`;
+    }
+    
+    return 'AUTO';
+  }
+  
+  // 更新翻译按钮状态
+  function updateTranslateButton(loading) {
+    if (loading) {
+      translateBtn.disabled = true;
+      translateBtn.innerHTML = '<div class="loading-spinner"></div> 翻译中...';
+    } else {
+      translateBtn.disabled = false;
+      translateBtn.innerHTML = '<i class="layui-icon layui-icon-ok"></i> 开始翻译';
+    }
+  }
+  
+  // 清空所有内容
+  function clearAll() {
+    sourceText.value = '';
+    targetText.value = '';
+    sourceCount.textContent = '0';
+    targetCount.textContent = '0';
+    layer.msg('已清空所有内容', {icon: 1});
+  }
+  
+  // 粘贴文本
+  async function pasteText() {
+    try {
+      const text = await navigator.clipboard.readText();
+      if (text) {
+        sourceText.value = text;
+        handleSourceTextChange();
+        layer.msg('已粘贴文本', {icon: 1});
+      } else {
+        layer.msg('剪贴板为空', {icon: 0});
+      }
+    } catch (error) {
+      layer.msg('粘贴失败，请手动粘贴', {icon: 2});
+    }
+  }
+  
+  // 复制译文
+  async function copyTranslation() {
+    const text = targetText.value;
+    if (!text) {
+      layer.msg('没有可复制的译文', {icon: 0});
+      return;
+    }
+    
+    try {
+      await navigator.clipboard.writeText(text);
+      layer.msg('译文已复制到剪贴板', {icon: 1});
+    } catch (error) {
+      // 降级处理：选中文本
+      targetText.select();
+      layer.msg('请手动复制选中的文本', {icon: 0});
+    }
+  }
+  
+  // 清空源文本
+  function clearSourceText() {
+    sourceText.value = '';
+    sourceCount.textContent = '0';
+  }
+  
+  // 清空译文
+  function clearTargetText() {
+    targetText.value = '';
+    targetCount.textContent = '0';
+  }
+  
+  // 添加到历史记录
+  function addToHistory(record) {
+    translateHistory.unshift(record);
+    
+    // 限制历史记录数量
+    if (translateHistory.length > 50) {
+      translateHistory = translateHistory.slice(0, 50);
+    }
+    
+    saveTranslateHistory();
+    renderHistory();
+  }
+  
+  // 加载翻译历史
+  function loadTranslateHistory() {
+    try {
+      const saved = localStorage.getItem('translate_history');
+      if (saved) {
+        translateHistory = JSON.parse(saved) || [];
+      }
+    } catch (error) {
+      console.error('加载历史记录失败:', error);
+      translateHistory = [];
+    }
+    renderHistory();
+  }
+  
+  // 保存翻译历史
+  function saveTranslateHistory() {
+    try {
+      localStorage.setItem('translate_history', JSON.stringify(translateHistory));
+    } catch (error) {
+      console.error('保存历史记录失败:', error);
+    }
+  }
+  
+  // 渲染历史记录
+  function renderHistory() {
+    if (translateHistory.length === 0) {
+      historyContainer.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon">
+            <i class="layui-icon layui-icon-time"></i>
+          </div>
+          <p style="font-size: 16px; margin: 0;">暂无翻译历史</p>
+          <p style="font-size: 14px; margin: 8px 0 0 0; opacity: 0.7;">开始翻译后，历史记录将在此显示</p>
+        </div>
+      `;
+      return;
+    }
+    
+    const historyHtml = translateHistory.map((record, index) => {
+      const date = new Date(record.timestamp);
+      const timeStr = date.toLocaleString('zh-CN', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+      
+      return `
+        <div class="history-item" data-index="${index}">
+          <div class="history-header">
+            <span class="history-route">${getRouteDisplayName(record.route)}</span>
+            <span class="history-time">${timeStr}</span>
+          </div>
+          <div class="history-content">
+            <div class="history-text">${escapeHtml(record.source)}</div>
+            <div class="history-arrow">
+              <i class="layui-icon layui-icon-right"></i>
+            </div>
+            <div class="history-text">${escapeHtml(record.target)}</div>
+          </div>
+        </div>
+      `;
+    }).join('');
+    
+    historyContainer.innerHTML = `<div class="history-list" style="display: grid; gap: 12px; max-height: 400px; overflow-y: auto;">${historyHtml}</div>`;
+    
+    // 绑定历史记录点击事件
+    bindHistoryEvents();
+  }
+  
+  // 绑定历史记录事件
+  function bindHistoryEvents() {
+    const historyItems = document.querySelectorAll('.history-item');
+    historyItems.forEach(item => {
+      item.addEventListener('click', function() {
+        const index = parseInt(this.dataset.index);
+        const record = translateHistory[index];
+        if (record) {
+          // 恢复翻译内容
+          sourceText.value = record.source;
+          targetText.value = record.target;
+          
+          // 更新计数
+          handleSourceTextChange();
+          updateTargetCount();
+          
+          layer.msg('已恢复历史翻译内容', {icon: 1});
+        }
+      });
+    });
+  }
+  
+  // 获取路线显示名称
+  function getRouteDisplayName(route) {
+    const names = {
+      youdao: '有道翻译'
+    };
+    return names[route] || route;
+  }
+  
+  // HTML转义
+  function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+});
+</script>
+{% endblock %}
+

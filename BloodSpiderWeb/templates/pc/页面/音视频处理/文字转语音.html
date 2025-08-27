@@ -1,0 +1,716 @@
+<!-- 文字转语音组件 -->
+<div class="tts-container">
+    <!-- 功能卡片 -->
+    <div class="function-card">
+        <div class="card-header">
+            <div class="header-icon">
+                <i class="layui-icon layui-icon-voice"></i>
+            </div>
+            <div class="header-content">
+                <h3 class="card-title">文字转语音</h3>
+                <p class="card-subtitle">AI智能语音合成，支持多种音色和语速调节</p>
+            </div>
+        </div>
+
+        <!-- 输入区域 -->
+        <div class="input-section">
+            <div class="form-group">
+                <label class="form-label">输入文本</label>
+                <textarea 
+                    id="tts-text-input" 
+                    class="form-textarea" 
+                    placeholder="请输入要转换为语音的文本内容（最多5000字符）..."
+                    maxlength="5000"
+                ></textarea>
+                <div class="text-counter">
+                    <span id="char-count">0</span> / 5000 字符
+                </div>
+            </div>
+
+
+        </div>
+
+        <!-- 操作按钮 -->
+        <div class="action-section">
+            <button id="tts-generate-btn" class="primary-btn">
+                <i class="layui-icon layui-icon-play"></i>
+                开始生成语音
+            </button>
+            <button id="tts-clear-btn" class="secondary-btn">
+                <i class="layui-icon layui-icon-refresh"></i>
+                清空内容
+            </button>
+        </div>
+
+        <!-- 进度指示器 -->
+        <div class="progress-section" id="tts-progress" style="display: none;">
+            <div class="progress-header">
+                <span class="progress-text">正在生成语音...</span>
+                <span class="progress-percent" id="progress-percent">0%</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill"></div>
+            </div>
+            <div class="progress-info">
+                <span class="task-id">任务ID: <span id="task-id-display">-</span></span>
+                <span class="estimated-time">预计时间: <span id="estimated-time">-</span></span>
+            </div>
+        </div>
+
+        <!-- 结果区域 -->
+        <div class="result-section" id="tts-result" style="display: none;">
+            <div class="result-header">
+                <h4 class="result-title">生成结果</h4>
+                <div class="result-actions">
+                    <button id="download-btn" class="download-btn">
+                        <i class="layui-icon layui-icon-download-circle"></i>
+                        下载音频
+                    </button>
+                </div>
+            </div>
+            
+            <div class="audio-player">
+                <audio id="result-audio" controls preload="none">
+                    您的浏览器不支持音频播放
+                </audio>
+            </div>
+
+            <div class="result-info">
+                <div class="info-item">
+                    <span class="info-label">文件大小:</span>
+                    <span class="info-value" id="file-size">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">音频时长:</span>
+                    <span class="info-value" id="audio-duration">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">生成时间:</span>
+                    <span class="info-value" id="generation-time">-</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* 文字转语音组件样式 */
+.tts-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 0 16px;
+    box-sizing: border-box;
+}
+
+.function-card {
+    background: white;
+    border-radius: 16px;
+    padding: 32px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+    border: 1px solid var(--light-purple);
+    transition: all 0.3s ease;
+}
+
+.function-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-purple);
+}
+
+.card-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 32px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid var(--light-purple);
+}
+
+.header-icon {
+    width: 60px;
+    height: 60px;
+    background: var(--gradient-primary);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 20px;
+    box-shadow: var(--shadow-purple);
+}
+
+.header-icon .iconfont {
+    font-size: 28px;
+    color: white;
+}
+
+.card-title {
+    font-size: 24px;
+    font-weight: bold;
+    color: var(--text-primary);
+    margin: 0 0 8px 0;
+}
+
+.card-subtitle {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* 表单样式 */
+.form-group {
+    margin-bottom: 24px;
+}
+
+.form-label {
+    display: block;
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+}
+
+.form-textarea {
+    width: 100%;
+    min-height: 120px;
+    padding: 16px;
+    border: 2px solid var(--light-purple);
+    border-radius: 12px;
+    font-size: 16px;
+    line-height: 1.5;
+    resize: vertical;
+    transition: all 0.3s ease;
+    font-family: inherit;
+    box-sizing: border-box;
+}
+
+.form-textarea:focus {
+    outline: none;
+    border-color: var(--primary-purple);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.text-counter {
+    text-align: right;
+    margin-top: 8px;
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+
+
+/* 按钮样式 */
+.action-section {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.primary-btn, .secondary-btn {
+    padding: 14px 28px;
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 160px;
+    max-width: 200px;
+    justify-content: center;
+    white-space: nowrap;
+    box-sizing: border-box;
+}
+
+.primary-btn {
+    background: var(--gradient-primary);
+    color: white;
+    box-shadow: var(--shadow-purple);
+}
+
+.primary-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 28px rgba(99, 102, 241, 0.4);
+}
+
+.secondary-btn {
+    background: var(--gradient-secondary);
+    color: white;
+    box-shadow: var(--shadow-blue);
+}
+
+.secondary-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+}
+
+/* 进度区域 */
+.progress-section {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(14, 165, 233, 0.1));
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 24px;
+    border: 1px solid var(--light-blue);
+}
+
+.progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.progress-text {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.progress-percent {
+    font-size: 16px;
+    font-weight: bold;
+    color: var(--primary-purple);
+}
+
+.progress-bar {
+    width: 100%;
+    height: 8px;
+    background: rgba(255,255,255,0.3);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 12px;
+}
+
+.progress-fill {
+    height: 100%;
+    background: var(--gradient-primary);
+    border-radius: 4px;
+    width: 0%;
+    transition: width 0.3s ease;
+}
+
+.progress-info {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    color: var(--text-secondary);
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+/* 结果区域 */
+.result-section {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(125, 211, 252, 0.1));
+    border-radius: 12px;
+    padding: 24px;
+    border: 1px solid var(--light-green);
+}
+
+.result-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.result-title {
+    font-size: 18px;
+    font-weight: bold;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.download-btn {
+    padding: 8px 16px;
+    background: var(--matcha-green);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.download-btn:hover {
+    background: #059669;
+    transform: translateY(-1px);
+}
+
+.audio-player {
+    margin-bottom: 20px;
+}
+
+.audio-player audio {
+    width: 100%;
+    height: 40px;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+.result-info {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 16px;
+}
+
+.info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.info-label {
+    font-size: 12px;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.info-value {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+/* 响应式设计 */
+@media (max-width: 1199px) {
+    .tts-container {
+        max-width: 90%;
+        padding: 0 20px;
+    }
+    
+    .function-card {
+        padding: 24px;
+    }
+}
+
+@media (max-width: 767px) {
+    .tts-container {
+        max-width: 100%;
+        padding: 0 12px;
+    }
+    
+    .function-card {
+        padding: 20px;
+        margin: 0;
+    }
+    
+    .card-header {
+        flex-direction: column;
+        text-align: center;
+        margin-bottom: 24px;
+    }
+    
+    .header-icon {
+        margin-right: 0;
+        margin-bottom: 16px;
+    }
+    
+    .form-textarea {
+        min-height: 100px;
+        padding: 12px;
+        font-size: 14px;
+    }
+    
+    .action-section {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .primary-btn, .secondary-btn {
+        width: 100%;
+        max-width: 300px;
+        padding: 12px 20px;
+        min-width: auto;
+    }
+    
+    .progress-info, .result-header {
+        flex-direction: column;
+        gap: 8px;
+        align-items: flex-start;
+    }
+    
+    .result-info {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    
+    .download-btn {
+        align-self: stretch;
+        justify-content: center;
+    }
+}
+</style>
+
+<script>
+// 文字转语音功能实现
+document.addEventListener('DOMContentLoaded', function() {
+    // 获取DOM元素
+    const textInput = document.getElementById('tts-text-input');
+    const charCount = document.getElementById('char-count');
+    const generateBtn = document.getElementById('tts-generate-btn');
+    const clearBtn = document.getElementById('tts-clear-btn');
+    const progressSection = document.getElementById('tts-progress');
+    const resultSection = document.getElementById('tts-result');
+    const taskIdDisplay = document.getElementById('task-id-display');
+    const estimatedTime = document.getElementById('estimated-time');
+    const progressFill = document.getElementById('progress-fill');
+    const progressPercent = document.getElementById('progress-percent');
+    const resultAudio = document.getElementById('result-audio');
+    const downloadBtn = document.getElementById('download-btn');
+    const fileSize = document.getElementById('file-size');
+    const audioDuration = document.getElementById('audio-duration');
+    const generationTime = document.getElementById('generation-time');
+
+    let currentTaskId = null;
+    let pollTimer = null;
+
+    // 字符计数
+    textInput.addEventListener('input', function() {
+        const count = this.value.length;
+        charCount.textContent = count;
+        
+        if (count > 4500) {
+            charCount.style.color = '#ef4444';
+        } else if (count > 3000) {
+            charCount.style.color = '#f59e0b';
+        } else {
+            charCount.style.color = 'var(--text-secondary)';
+        }
+    });
+
+
+
+    // 清空按钮
+    clearBtn.addEventListener('click', function() {
+        textInput.value = '';
+        charCount.textContent = '0';
+        charCount.style.color = 'var(--text-secondary)';
+        hideProgress();
+        hideResult();
+    });
+
+    // 生成语音按钮
+    generateBtn.addEventListener('click', function() {
+        const text = textInput.value.trim();
+        
+        if (!text) {
+            layui.use('layer', function(){
+                var layer = layui.layer;
+                layer.msg('请输入要转换的文本内容', {icon: 2});
+            });
+            return;
+        }
+
+        if (text.length > 5000) {
+            layui.use('layer', function(){
+                var layer = layui.layer;
+                layer.msg('文本长度不能超过5000个字符', {icon: 2});
+            });
+            return;
+        }
+
+        startTextToSpeech(text);
+    });
+
+    // 开始文字转语音
+    function startTextToSpeech(text) {
+        // 构建表单数据，使用默认设置
+        const formData = new FormData();
+        formData.append('text', text);
+
+        generateBtn.disabled = true;
+        generateBtn.innerHTML = '<i class="layui-icon layui-icon-loading layui-anim layui-anim-rotate layui-anim-loop"></i> 生成中...';
+        showProgress();
+        hideResult();
+
+        // 调用创建任务API
+        axios.post('/api/utils/reccloud/tastasksks_audio_speech_create/', formData, {
+            timeout: 30000,
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        })
+        .then(response => {
+            if (response.data && response.data.code === 0) {
+                const data = response.data.data;
+                // 根据新的API结构，任务ID在data.data中
+                if (data.status === 200 && data.data && data.data.task_id) {
+                    currentTaskId = data.data.task_id;
+                    taskIdDisplay.textContent = currentTaskId;
+                    estimatedTime.textContent = data.data.estimated_time ? `预计${data.data.estimated_time}秒` : '预计2-5分钟';
+                    
+                    // 开始轮询任务状态
+                    startPolling();
+                } else {
+                    throw new Error(data.message || '创建任务失败');
+                }
+            } else {
+                throw new Error(response.data?.message || '创建任务失败');
+            }
+        })
+        .catch(error => {
+            console.error('创建文字转语音任务失败:', error);
+            layui.use('layer', function(){
+                var layer = layui.layer;
+                layer.msg('创建任务失败: ' + (error.response?.data?.message || error.message), {icon: 2});
+            });
+            resetGenerateButton();
+            hideProgress();
+        });
+    }
+
+    // 开始轮询任务状态
+    function startPolling() {
+        if (!currentTaskId) return;
+
+        pollTimer = setInterval(() => {
+            checkTaskStatus();
+        }, 3000);
+    }
+
+    // 检查任务状态
+    function checkTaskStatus() {
+        if (!currentTaskId) return;
+
+        axios.get('/api/utils/reccloud/tastasksks_audio_speech_task_id/', {
+            params: {
+                task_id: currentTaskId
+            },
+            timeout: 30000
+        })
+        .then(response => {
+            if (response.data && response.data.code === 0) {
+                const responseData = response.data.data;
+                
+                if (responseData.status === 200 && responseData.data) {
+                    const taskData = responseData.data;
+                    
+                    // 根据state判断任务状态：1=完成，0=进行中
+                    if (taskData.state === 1 && taskData.progress === 100) {
+                        // 任务完成
+                        stopPolling();
+                        showResult(taskData);
+                        resetGenerateButton();
+                        hideProgress();
+                    } else if (taskData.state === 0) {
+                        // 任务进行中，更新进度
+                        updateProgress(taskData.progress || 0);
+                    } else {
+                        // 其他状态视为失败
+                        stopPolling();
+                        layui.use('layer', function(){
+                            var layer = layui.layer;
+                            layer.msg('语音生成失败，请重试', {icon: 2});
+                        });
+                        resetGenerateButton();
+                        hideProgress();
+                    }
+                } else {
+                    throw new Error(responseData.message || '查询任务状态失败');
+                }
+            } else {
+                throw new Error(response.data?.message || '查询任务状态失败');
+            }
+        })
+        .catch(error => {
+            console.error('查询任务状态失败:', error);
+            // 继续轮询，不中断
+        });
+    }
+
+    // 停止轮询
+    function stopPolling() {
+        if (pollTimer) {
+            clearInterval(pollTimer);
+            pollTimer = null;
+        }
+    }
+
+    // 更新进度
+    function updateProgress(progress) {
+        const percent = Math.min(Math.max(progress, 0), 100);
+        progressFill.style.width = percent + '%';
+        progressPercent.textContent = percent + '%';
+    }
+
+    // 显示进度
+    function showProgress() {
+        progressSection.style.display = 'block';
+        updateProgress(0);
+    }
+
+    // 隐藏进度
+    function hideProgress() {
+        progressSection.style.display = 'none';
+        stopPolling();
+    }
+
+    // 显示结果
+    function showResult(data) {
+        if (data.file && data.file.trim() !== '') {
+            resultAudio.src = data.file;
+            resultAudio.load();
+            
+            downloadBtn.onclick = () => {
+                window.open(data.file, '_blank');
+            };
+            
+            // 更新结果信息
+            // 文件大小转换为可读格式
+            const formatFileSize = (bytes) => {
+                if (bytes === 0) return '0 Bytes';
+                const k = 1024;
+                const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+            };
+            
+            // 音频时长转换为可读格式（毫秒转为分:秒）
+            const formatDuration = (milliseconds) => {
+                if (!milliseconds) return '未知';
+                const seconds = Math.floor(milliseconds / 1000);
+                const minutes = Math.floor(seconds / 60);
+                const remainingSeconds = seconds % 60;
+                return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+            };
+            
+            fileSize.textContent = data.file_size ? formatFileSize(data.file_size) : '未知';
+            audioDuration.textContent = formatDuration(data.duration);
+            generationTime.textContent = new Date().toLocaleString();
+            
+            resultSection.style.display = 'block';
+            
+            layui.use('layer', function(){
+                var layer = layui.layer;
+                layer.msg('语音生成成功！', {icon: 1});
+            });
+        } else {
+            layui.use('layer', function(){
+                var layer = layui.layer;
+                layer.msg('生成结果异常，请重试', {icon: 2});
+            });
+        }
+    }
+
+    // 隐藏结果
+    function hideResult() {
+        resultSection.style.display = 'none';
+        resultAudio.src = '';
+    }
+
+    // 重置生成按钮
+    function resetGenerateButton() {
+        generateBtn.disabled = false;
+        generateBtn.innerHTML = '<i class="layui-icon layui-icon-play"></i> 开始生成语音';
+    }
+});
+</script>

@@ -70,12 +70,17 @@ class ReccloudMain:
         retries = 0
         while retries < max_retries:
             try:
+                response = None
                 if method == 'post':
                     response = self.session.post(url, headers=headers, data=data, params=params)
                 elif method == 'get':
                     response = self.session.get(url, headers=headers, data=data, params=params)
-                response.raise_for_status()  # 检查响应状态码
-                return response.json()
+                
+                if response is not None:
+                    response.raise_for_status()  # 检查响应状态码
+                    return response.json()
+                else:
+                    raise ValueError(f"Unsupported HTTP method: {method}")
             except RequestException as e:
                 print(f"Request failed: {e}. Retrying in {retry_delay} seconds...")
                 retries += 1
@@ -90,10 +95,10 @@ class ReccloudMain:
             voice="XiaoxiaoMultilingual",
             volume=100,
             rate=1,
-            background_music: dict = None,
+            background_music: dict | None = None,
     ):
         """
-        AI 语音转文字 - 创建任务
+        AI 文字转语音 - 创建任务
 
         return: {'status': 200, 'message': 'success', 'data': {'task_id': '8c52c86b-4cbf-4910-adaf-659effecb4e8', 'estimated_time': 5}}
         """
@@ -121,17 +126,18 @@ class ReccloudMain:
     #  文字转语音查询结果
     def tasks_audio_speech_task_id(self, task_id):
         """
-        AI 语音转文字 - 查询结果
+        AI 文字转语音 - 查询结果
         """
         headers = self.reccloud_utils.get_headers()
         url = f'{self.api_base_url}/app/reccloud/v2/open/ai/audio/speech/{task_id}'
         return self.make_request('get', url, headers=headers)
 
     # AI 语音转文字
-    def tasks_audio_recognition(self, uniqid):
+    def tasks_audio_recognition(self, uniqid, truncation_at = 50):
         # 441892f2-4807-4e2a-adb7-5750a84f5772
         """
         AI 语音转文字 - 创建任务
+        如果发现语音转文字的时候没有把语音的全部文本转换出来，那么就是truncation_at设计的不够长，truncation_at就是视频的时间 - 1
         """
         data_dict = {
             "app_lang": "zh",
@@ -139,7 +145,7 @@ class ReccloudMain:
             "type": "4",
             "content_type": "1",
             "uniqid": uniqid,
-            "truncation_at": 19,
+            "truncation_at": truncation_at,
             "source": "web",
             "device_id": self.reccloud_utils.common_utils.generate_device_id(),
             "speaker_identification": 0,
@@ -211,4 +217,4 @@ class ReccloudMain:
 if __name__ == '__main__':
     reccloud = ReccloudMain()
     # 上传文件
-    print(reccloud.reccloud_utils.reccloud_upload.upload_file_to_reccloud("b.mp4"))
+    print(reccloud.tasks_audio_recognition("pk7qn64"))

@@ -10,7 +10,6 @@ urlpatterns = [
     path('virtual_emails/', include('BloodSpiderAPI.apis.virtual_emails.urls')),
     # 翻译
     path('translation/', include('BloodSpiderAPI.apis.translation.urls')),
-    # 用户
-    path('user/', include('BloodSpiderAPI.apis.user.urls')),
+
 
 ]

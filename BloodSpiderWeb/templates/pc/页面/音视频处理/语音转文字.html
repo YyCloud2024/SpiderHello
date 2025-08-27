@@ -1,0 +1,787 @@
+<!-- 语音转文字组件 -->
+<div class="stt-container">
+    <!-- 功能卡片 -->
+    <div class="function-card">
+        <div class="card-header">
+            <div class="header-icon">
+                <i class="layui-icon layui-icon-mike"></i>
+            </div>
+            <div class="header-content">
+                <h3 class="card-title">语音转文字</h3>
+                <p class="card-subtitle">AI智能语音识别，支持多种音频格式转换为文字</p>
+            </div>
+        </div>
+
+        <!-- 文件上传区域 -->
+        <div class="upload-section">
+            <div class="form-group">
+                <label class="form-label">选择音频文件</label>
+                <div class="upload-area" id="upload-area">
+                    <input type="file" id="audio-file-input" class="file-input" accept="audio/*,.mp3,.wav,.m4a,.aac,.ogg">
+                    <div class="upload-content">
+                        <div class="upload-icon">
+                            <i class="layui-icon layui-icon-upload"></i>
+                        </div>
+                        <div class="upload-text">
+                            <p class="upload-title">点击选择或拖拽音频文件</p>
+                            <p class="upload-subtitle">支持 MP3、WAV、M4A、AAC、OGG 格式，最大 100MB</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="file-info" id="file-info" style="display: none;">
+                    <div class="file-details">
+                        <i class="layui-icon layui-icon-file"></i>
+                        <div class="file-meta">
+                            <span class="file-name" id="file-name">-</span>
+                            <span class="file-size" id="file-size">-</span>
+                        </div>
+                        <button class="remove-file-btn" id="remove-file-btn">
+                            <i class="layui-icon layui-icon-delete"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 操作按钮 -->
+        <div class="action-section">
+            <button id="stt-process-btn" class="primary-btn" disabled>
+                <i class="layui-icon layui-icon-play"></i>
+                开始识别语音
+            </button>
+            <button id="stt-clear-btn" class="secondary-btn">
+                <i class="layui-icon layui-icon-refresh"></i>
+                清空重置
+            </button>
+        </div>
+
+        <!-- 上传进度 -->
+        <div class="upload-progress-section" id="upload-progress" style="display: none;">
+            <div class="progress-header">
+                <span class="progress-text">正在上传文件...</span>
+                <span class="progress-percent" id="upload-percent">0%</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="upload-fill"></div>
+            </div>
+        </div>
+
+        <!-- 识别进度 -->
+        <div class="process-progress-section" id="process-progress" style="display: none;">
+            <div class="progress-header">
+                <span class="progress-text">正在识别语音...</span>
+                <span class="progress-percent" id="process-percent">0%</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="process-fill"></div>
+            </div>
+            <div class="progress-info">
+                <span class="task-id">任务ID: <span id="task-id-display">-</span></span>
+                <span class="file-duration">音频时长: <span id="audio-duration">-</span></span>
+            </div>
+        </div>
+
+        <!-- 结果区域 -->
+        <div class="result-section" id="stt-result" style="display: none;">
+            <div class="result-header">
+                <h4 class="result-title">识别结果</h4>
+                <div class="result-actions">
+                    <button id="copy-text-btn" class="action-btn">
+                        <i class="layui-icon layui-icon-file"></i>
+                        复制文本
+                    </button>
+                    <button id="download-text-btn" class="action-btn">
+                        <i class="layui-icon layui-icon-download-circle"></i>
+                        下载文本
+                    </button>
+                </div>
+            </div>
+            
+            <div class="result-content">
+                <div class="text-result" id="recognition-text">
+                    <!-- 识别出的文字内容 -->
+                </div>
+            </div>
+
+            <div class="result-info">
+                <div class="info-item">
+                    <span class="info-label">音频时长:</span>
+                    <span class="info-value" id="result-duration">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">文字数量:</span>
+                    <span class="info-value" id="text-count">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">识别时间:</span>
+                    <span class="info-value" id="recognition-time">-</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* 语音转文字组件样式 */
+.stt-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 0 16px;
+    box-sizing: border-box;
+}
+
+/* 文件上传区域 */
+.upload-area {
+    border: 2px dashed var(--light-purple);
+    border-radius: 12px;
+    padding: 40px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: rgba(99, 102, 241, 0.02);
+    position: relative;
+}
+
+.upload-area:hover {
+    border-color: var(--primary-purple);
+    background: rgba(99, 102, 241, 0.05);
+}
+
+.upload-area.drag-over {
+    border-color: var(--primary-purple);
+    background: rgba(99, 102, 241, 0.1);
+    transform: scale(1.02);
+}
+
+.file-input {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.upload-content {
+    pointer-events: none;
+}
+
+.upload-icon {
+    font-size: 48px;
+    color: var(--primary-purple);
+    margin-bottom: 16px;
+}
+
+.upload-title {
+    font-size: 18px;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin: 0 0 8px 0;
+}
+
+.upload-subtitle {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+/* 文件信息 */
+.file-info {
+    margin-top: 16px;
+    padding: 16px;
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(14, 165, 233, 0.1));
+    border-radius: 12px;
+    border: 1px solid var(--light-blue);
+}
+
+.file-details {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.file-details .iconfont {
+    font-size: 24px;
+    color: var(--primary-purple);
+}
+
+.file-meta {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.file-name {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.file-size {
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+.remove-file-btn {
+    padding: 8px;
+    background: #ef4444;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.remove-file-btn:hover {
+    background: #dc2626;
+    transform: scale(1.1);
+}
+
+/* 进度区域样式 */
+.upload-progress-section, .process-progress-section {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(14, 165, 233, 0.1));
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 24px;
+    border: 1px solid var(--light-blue);
+}
+
+/* 结果文本样式 */
+.text-result {
+    background: white;
+    border: 1px solid var(--light-purple);
+    border-radius: 8px;
+    padding: 20px;
+    min-height: 120px;
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--text-primary);
+    margin-bottom: 20px;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+.result-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.action-btn {
+    padding: 8px 16px;
+    background: var(--matcha-green);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.action-btn:hover {
+    background: #059669;
+    transform: translateY(-1px);
+}
+
+/* 响应式设计 */
+@media (max-width: 1199px) {
+    .stt-container {
+        max-width: 90%;
+        padding: 0 20px;
+    }
+}
+
+@media (max-width: 767px) {
+    .stt-container {
+        max-width: 100%;
+        padding: 0 12px;
+    }
+    
+    .upload-area {
+        padding: 24px 16px;
+    }
+    
+    .upload-icon {
+        font-size: 36px;
+    }
+    
+    .upload-title {
+        font-size: 16px;
+    }
+    
+    .file-details {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+    
+    .remove-file-btn {
+        align-self: flex-end;
+    }
+    
+    .result-actions {
+        flex-direction: column;
+    }
+    
+    .action-btn {
+        justify-content: center;
+    }
+}
+</style>
+
+<script>
+// 语音转文字功能实现
+document.addEventListener('DOMContentLoaded', function() {
+    // 获取DOM元素
+    const uploadArea = document.getElementById('upload-area');
+    const fileInput = document.getElementById('audio-file-input');
+    const fileInfo = document.getElementById('file-info');
+    const fileName = document.getElementById('file-name');
+    const fileSize = document.getElementById('file-size');
+    const removeFileBtn = document.getElementById('remove-file-btn');
+    const processBtn = document.getElementById('stt-process-btn');
+    const clearBtn = document.getElementById('stt-clear-btn');
+    const uploadProgress = document.getElementById('upload-progress');
+    const uploadPercent = document.getElementById('upload-percent');
+    const uploadFill = document.getElementById('upload-fill');
+    const processProgress = document.getElementById('process-progress');
+    const processPercent = document.getElementById('process-percent');
+    const processFill = document.getElementById('process-fill');
+    const taskIdDisplay = document.getElementById('task-id-display');
+    const audioDuration = document.getElementById('audio-duration');
+    const resultSection = document.getElementById('stt-result');
+    const recognitionText = document.getElementById('recognition-text');
+    const copyTextBtn = document.getElementById('copy-text-btn');
+    const downloadTextBtn = document.getElementById('download-text-btn');
+    const resultDuration = document.getElementById('result-duration');
+    const textCount = document.getElementById('text-count');
+    const recognitionTime = document.getElementById('recognition-time');
+
+    let selectedFile = null;
+    let currentUniqid = null;
+    let currentTaskId = null;
+    let pollTimer = null;
+
+    // 文件上传相关事件
+    uploadArea.addEventListener('click', () => fileInput.click());
+    uploadArea.addEventListener('dragover', handleDragOver);
+    uploadArea.addEventListener('dragleave', handleDragLeave);
+    uploadArea.addEventListener('drop', handleDrop);
+    fileInput.addEventListener('change', handleFileSelect);
+    removeFileBtn.addEventListener('click', clearFile);
+
+    // 按钮事件
+    processBtn.addEventListener('click', startSpeechRecognition);
+    clearBtn.addEventListener('click', resetAll);
+    copyTextBtn.addEventListener('click', copyResultText);
+    downloadTextBtn.addEventListener('click', downloadResultText);
+
+    // 拖拽处理
+    function handleDragOver(e) {
+        e.preventDefault();
+        uploadArea.classList.add('drag-over');
+    }
+
+    function handleDragLeave(e) {
+        e.preventDefault();
+        uploadArea.classList.remove('drag-over');
+    }
+
+    function handleDrop(e) {
+        e.preventDefault();
+        uploadArea.classList.remove('drag-over');
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            handleFile(files[0]);
+        }
+    }
+
+    function handleFileSelect(e) {
+        const file = e.target.files[0];
+        if (file) {
+            handleFile(file);
+        }
+    }
+
+    function handleFile(file) {
+        // 验证文件类型
+        const allowedTypes = ['audio/mp3', 'audio/wav', 'audio/mpeg', 'audio/mp4', 'audio/aac', 'audio/ogg'];
+        const fileExtension = file.name.toLowerCase().split('.').pop();
+        const allowedExtensions = ['mp3', 'wav', 'm4a', 'aac', 'ogg'];
+        
+        if (!allowedTypes.includes(file.type) && !allowedExtensions.includes(fileExtension)) {
+            layui.use('layer', function(){
+                var layer = layui.layer;
+                layer.msg('请选择支持的音频格式文件', {icon: 2});
+            });
+            return;
+        }
+
+        // 验证文件大小 (100MB)
+        const maxSize = 100 * 1024 * 1024;
+        if (file.size > maxSize) {
+            layui.use('layer', function(){
+                var layer = layui.layer;
+                layer.msg('文件大小不能超过100MB', {icon: 2});
+            });
+            return;
+        }
+
+        selectedFile = file;
+        showFileInfo(file);
+        processBtn.disabled = false;
+    }
+
+    function showFileInfo(file) {
+        fileName.textContent = file.name;
+        fileSize.textContent = formatFileSize(file.size);
+        fileInfo.style.display = 'block';
+        uploadArea.style.display = 'none';
+    }
+
+    function clearFile() {
+        selectedFile = null;
+        fileInput.value = '';
+        fileInfo.style.display = 'none';
+        uploadArea.style.display = 'block';
+        processBtn.disabled = true;
+        hideAllProgress();
+        hideResult();
+    }
+
+    function resetAll() {
+        clearFile();
+        currentUniqid = null;
+        currentTaskId = null;
+        stopPolling();
+    }
+
+    // 开始语音识别
+    function startSpeechRecognition() {
+        if (!selectedFile) {
+            layui.use('layer', function(){
+                var layer = layui.layer;
+                layer.msg('请先选择音频文件', {icon: 2});
+            });
+            return;
+        }
+
+        processBtn.disabled = true;
+        processBtn.innerHTML = '<i class="layui-icon layui-icon-loading layui-anim layui-anim-rotate layui-anim-loop"></i> 处理中...';
+        hideResult();
+        
+        // 第一步：上传文件
+        uploadFile();
+    }
+
+    // 上传文件
+    function uploadFile() {
+        const formData = new FormData();
+        formData.append('file', selectedFile);
+
+        showUploadProgress();
+
+        axios.post('/api/utils/reccloud/tasks/file/upload/', formData, {
+            timeout: 60000,
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            },
+            onUploadProgress: function(progressEvent) {
+                const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+                updateUploadProgress(percentCompleted);
+            }
+        })
+        .then(response => {
+            hideUploadProgress();
+            
+            if (response.data && response.data.code === 0) {
+                const uploadData = response.data.data;
+                if (uploadData.status === 200 && uploadData.data && uploadData.data.uniqid) {
+                    currentUniqid = uploadData.data.uniqid;
+                    
+                    // 显示音频时长
+                    if (uploadData.data.duration) {
+                        audioDuration.textContent = formatDuration(uploadData.data.duration);
+                    }
+                    
+                    // 第二步：创建识别任务
+                    createRecognitionTask();
+                } else {
+                    throw new Error(uploadData.message || '文件上传失败');
+                }
+            } else {
+                throw new Error(response.data?.message || '文件上传失败');
+            }
+        })
+        .catch(error => {
+            console.error('文件上传失败:', error);
+            layui.use('layer', function(){
+                var layer = layui.layer;
+                layer.msg('文件上传失败: ' + (error.response?.data?.message || error.message), {icon: 2});
+            });
+            resetProcessButton();
+            hideUploadProgress();
+        });
+    }
+
+    // 创建识别任务
+    function createRecognitionTask() {
+        const formData = new FormData();
+        formData.append('uniqid', currentUniqid);
+
+        showProcessProgress();
+
+        axios.post('/api/utils/reccloud/tasks_audio_recognition_create/', formData, {
+            timeout: 30000,
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        })
+        .then(response => {
+            if (response.data && response.data.code === 0) {
+                const taskData = response.data.data;
+                if (taskData.status === 200 && taskData.data && taskData.data.task_id) {
+                    currentTaskId = taskData.data.task_id;
+                    taskIdDisplay.textContent = currentTaskId;
+                    
+                    // 第三步：开始轮询任务状态
+                    startPolling();
+                } else {
+                    throw new Error(taskData.message || '创建识别任务失败');
+                }
+            } else {
+                throw new Error(response.data?.message || '创建识别任务失败');
+            }
+        })
+        .catch(error => {
+            console.error('创建识别任务失败:', error);
+            layui.use('layer', function(){
+                var layer = layui.layer;
+                layer.msg('创建识别任务失败: ' + (error.response?.data?.message || error.message), {icon: 2});
+            });
+            resetProcessButton();
+            hideProcessProgress();
+        });
+    }
+
+    // 开始轮询任务状态
+    function startPolling() {
+        if (!currentTaskId) return;
+
+        pollTimer = setInterval(() => {
+            checkTaskStatus();
+        }, 3000);
+    }
+
+    // 检查任务状态
+    function checkTaskStatus() {
+        if (!currentTaskId) return;
+
+        axios.get('/api/utils/reccloud/tasks_audio_recognition_task_id/', {
+            params: {
+                task_id: currentTaskId
+            },
+            timeout: 30000
+        })
+        .then(response => {
+            if (response.data && response.data.code === 0) {
+                const responseData = response.data.data;
+                
+                if (responseData.status === 200 && responseData.data && responseData.data.items && responseData.data.items.length > 0) {
+                    const taskItem = responseData.data.items[0];
+                    
+                    // 根据state判断任务状态：
+                    // state = 1: 任务完成
+                    // state = 0, 4, 或其他: 任务进行中
+                    // progress = 100: 处理完成
+                    if (taskItem.state === 1 && taskItem.progress === 100) {
+                        // 任务完成
+                        stopPolling();
+                        showResult(taskItem);
+                        resetProcessButton();
+                        hideProcessProgress();
+                    } else if (taskItem.state === 1 || taskItem.state === 0 || taskItem.state === 4) {
+                        // 任务进行中，更新进度
+                        updateProcessProgress(taskItem.progress || 0);
+                        
+                        // 如果进度达到100%但state不是1，继续等待
+                        if (taskItem.progress === 100 && taskItem.state !== 1) {
+                            console.log('Progress 100% but state not 1, continuing to poll...');
+                        }
+                    } else {
+                        // 其他状态可能表示失败
+                        console.log('Unknown state:', taskItem.state, 'progress:', taskItem.progress);
+                        
+                        // 如果有错误信息，显示错误
+                        if (taskItem.error && taskItem.error.trim() !== '') {
+                            stopPolling();
+                            layui.use('layer', function(){
+                                var layer = layui.layer;
+                                layer.msg('语音识别失败: ' + taskItem.error, {icon: 2});
+                            });
+                            resetProcessButton();
+                            hideProcessProgress();
+                        } else {
+                            // 无错误信息，继续轮询
+                            updateProcessProgress(taskItem.progress || 0);
+                        }
+                    }
+                } else {
+                    throw new Error(responseData.message || '查询任务状态失败');
+                }
+            } else {
+                throw new Error(response.data?.message || '查询任务状态失败');
+            }
+        })
+        .catch(error => {
+            console.error('查询任务状态失败:', error);
+            // 继续轮询，不中断，但是记录错误次数
+            if (!checkTaskStatus.errorCount) {
+                checkTaskStatus.errorCount = 0;
+            }
+            checkTaskStatus.errorCount++;
+            
+            // 如果连续错误超过5次，停止轮询
+            if (checkTaskStatus.errorCount >= 5) {
+                stopPolling();
+                layui.use('layer', function(){
+                    var layer = layui.layer;
+                    layer.msg('网络异常，请重试', {icon: 2});
+                });
+                resetProcessButton();
+                hideProcessProgress();
+            }
+        });
+    }
+
+    // 停止轮询
+    function stopPolling() {
+        if (pollTimer) {
+            clearInterval(pollTimer);
+            pollTimer = null;
+        }
+        // 重置错误计数
+        if (checkTaskStatus.errorCount) {
+            checkTaskStatus.errorCount = 0;
+        }
+    }
+
+    // 显示结果
+    function showResult(taskData) {
+        if (taskData.content && taskData.content.trim() !== '') {
+            recognitionText.textContent = taskData.content;
+            
+            // 更新结果信息
+            resultDuration.textContent = formatDuration(taskData.duration * 1000); // 转换为毫秒
+            textCount.textContent = taskData.content.length + ' 字';
+            recognitionTime.textContent = new Date().toLocaleString();
+            
+            resultSection.style.display = 'block';
+            
+            layui.use('layer', function(){
+                var layer = layui.layer;
+                layer.msg('语音识别完成！', {icon: 1});
+            });
+        } else {
+            layui.use('layer', function(){
+                var layer = layui.layer;
+                layer.msg('未识别到语音内容，请检查音频文件', {icon: 2});
+            });
+        }
+    }
+
+    // 复制文本
+    function copyResultText() {
+        const text = recognitionText.textContent;
+        navigator.clipboard.writeText(text).then(() => {
+            layui.use('layer', function(){
+                var layer = layui.layer;
+                layer.msg('文本已复制到剪贴板', {icon: 1});
+            });
+        }).catch(() => {
+            layui.use('layer', function(){
+                var layer = layui.layer;
+                layer.msg('复制失败，请手动选择复制', {icon: 2});
+            });
+        });
+    }
+
+    // 下载文本
+    function downloadResultText() {
+        const text = recognitionText.textContent;
+        const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `语音识别结果_${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.txt`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+    // 工具函数
+    function formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    function formatDuration(milliseconds) {
+        if (!milliseconds) return '未知';
+        const seconds = Math.floor(milliseconds / 1000);
+        const minutes = Math.floor(seconds / 60);
+        const remainingSeconds = seconds % 60;
+        return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+    }
+
+    function showUploadProgress() {
+        uploadProgress.style.display = 'block';
+    }
+
+    function hideUploadProgress() {
+        uploadProgress.style.display = 'none';
+    }
+
+    function updateUploadProgress(percent) {
+        uploadPercent.textContent = percent + '%';
+        uploadFill.style.width = percent + '%';
+    }
+
+    function showProcessProgress() {
+        processProgress.style.display = 'block';
+    }
+
+    function hideProcessProgress() {
+        processProgress.style.display = 'none';
+    }
+
+    function updateProcessProgress(percent) {
+        const safePercent = Math.min(Math.max(percent, 0), 100);
+        processPercent.textContent = safePercent + '%';
+        processFill.style.width = safePercent + '%';
+    }
+
+    function hideAllProgress() {
+        hideUploadProgress();
+        hideProcessProgress();
+    }
+
+    function hideResult() {
+        resultSection.style.display = 'none';
+    }
+
+    function resetProcessButton() {
+        processBtn.disabled = false;
+        processBtn.innerHTML = '<i class="layui-icon layui-icon-play"></i> 开始识别语音';
+    }
+});
+</script>

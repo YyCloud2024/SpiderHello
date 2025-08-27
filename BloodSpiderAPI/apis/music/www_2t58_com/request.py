@@ -20,6 +20,16 @@ def search_music(request):
 
     # 执行搜索
     try:
+        index_data = [
+            {
+                "name": "陈奕迅 - 富士山下",
+                "music_id": "bWh4bWRtaGM"
+            },
+            {
+                "name": "陈奕迅 - 十年-《明年今日》国语版|《隐婚男女》电影插曲|《摆渡人》电影插曲",
+                "music_id": "aGt4a2Q"
+            },
+        ]
         index_data = music_data.search_music(music_name)
     except Exception as e:
         return response_dict(code=500, message=f"搜索过程出错：{str(e)}")
